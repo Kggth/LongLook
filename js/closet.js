@@ -47,36 +47,83 @@ function addNewItem() {
     }
 }
 
-function saveItemToCloset(name, category, image) {
-    closetItems.push({
-        id: Date.now(),
-        name: name,
-        category: category,
-        image: image
+function compressImage(base64Str, maxWidth = 400, maxHeight = 400) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7)); // ย่อขนาดและบีบอัดภาพไม่ให้เกินความจุ localStorage
+        };
+        img.onerror = () => resolve(base64Str);
     });
+}
 
-    localStorage.setItem(
-        'wardrobe_items',
-        JSON.stringify(closetItems)
-    );
+async function saveItemToCloset(name, category, image) {
+    try {
+        let finalImage = image;
+        if (image && image.startsWith('data:image')) {
+            finalImage = await compressImage(image);
+        }
 
-    if (typeof closeModal === 'function') closeModal();
-    if (typeof closeAddClothModal === 'function') closeAddClothModal();
+        const newItem = {
+            id: Date.now(),
+            name: name,
+            category: category,
+            image: finalImage
+        };
 
-    const nameInput = document.getElementById('item-name') || document.getElementById('cloth-name');
-    if (nameInput) nameInput.value = '';
+        closetItems.push(newItem);
 
-    const fileInput = document.getElementById('item-image-file') || document.getElementById('cloth-image');
-    if (fileInput) fileInput.value = '';
+        try {
+            localStorage.setItem('wardrobe_items', JSON.stringify(closetItems));
+        } catch (storageError) {
+            console.warn('LocalStorage Quota Warning, trimming stored items...');
+            // ถ้าพื้นที่เต็ม ให้ใช้รูป placeholder เพื่อให้ยังบันทึกไอเทมได้
+            newItem.image = 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300';
+            localStorage.setItem('wardrobe_items', JSON.stringify(closetItems));
+        }
 
-    renderCloset();
+        if (typeof closeModal === 'function') closeModal();
+        if (typeof closeAddClothModal === 'function') closeAddClothModal();
 
-    if (typeof populateBuilderOptions === 'function') populateBuilderOptions();
+        const nameInput = document.getElementById('item-name') || document.getElementById('cloth-name');
+        if (nameInput) nameInput.value = '';
 
-    if (typeof showPopup === 'function') {
-        showPopup('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
-    } else {
-        alert('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+        const fileInput = document.getElementById('item-image-file') || document.getElementById('cloth-image');
+        if (fileInput) fileInput.value = '';
+
+        renderCloset();
+
+        if (typeof populateBuilderOptions === 'function') populateBuilderOptions();
+
+        if (typeof showPopup === 'function') {
+            showPopup('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+        } else {
+            alert('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+        }
+    } catch (err) {
+        console.error('Error saving item:', err);
+        alert('เกิดข้อผิดพลาดในการบันทึกเสื้อผ้า: ' + err.message);
     }
 }
 
