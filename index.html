@@ -222,51 +222,26 @@
 
         <!-- PAGE 3: AUTOMATIC OUTFIT MATCHER -->
         <div id="page-matcher" class="page-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-wand-magic-sparkles text-[#8C6D53] mr-2"></i> ระบบแมตช์ชุดอัตโนมัติ (AUTO MATCHER)</h2>
-                    <p class="text-xs text-gray-400">เลือกล็อคเงื่อนไขเพื่อให้ระบบสุ่มจับคู่เสื้อผ้าของคุณมาจัดชุด</p>
-                </div>
+            <h2 class="text-2xl font-bold">✨ ระบบแมตช์ชุดอัตโนมัติ</h2>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6]">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">วันนี้ไปไหน (โอกาส)</label>
-                        <select id="match-occasion" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                            <option value="ไปเรียน / ไปทำงาน">ไปเรียน / ไปทำงาน</option>
-                            <option value="เดินเล่น / คาเฟ่">เดินเล่น / คาเฟ่</option>
-                            <option value="ออกงานทางการ">ออกงานทางการ</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">สภาพอากาศ</label>
-                        <select id="match-weather" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                            <option value="ร้อน">ร้อน ☀️</option>
-                            <option value="ฝนตก">ฝนตก 🌧️</option>
-                            <option value="หนาว">หนาว ❄️</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">สไตล์ที่ชอบ</label>
-                        <select id="match-style" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                            <option value="CASUAL">CASUAL</option>
-                            <option value="KOREAN">KOREAN</option>
-                            <option value="VINTAGE">VINTAGE</option>
-                            <option value="STREET">STREET</option>
-                            <option value="FORMAL">FORMAL</option>
-                        </select>
-                    </div>
-                </div>
+            <div class="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-6 text-center">
+                <p class="text-sm text-gray-500">
+                    ระบบจะช่วยสุ่มจับคู่เสื้อผ้าแบบเต็มตัวจากตู้เสื้อผ้าของคุณให้อัตโนมัติ!
+                </p>
 
-                <button onclick="generateAutoOutfit()" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-3 rounded-2xl text-xs font-bold transition shadow-sm">
-                    <i class="fa-solid fa-dice mr-1"></i> สุ่มจับคู่แมตช์ชุดจากเสื้อผ้าในตู้ของคุณ
+                <button onclick="randomOutfit()" class="bg-[#E89387] hover:bg-[#d88276] text-white px-8 py-3 rounded-2xl text-sm font-semibold transition shadow-sm">
+                    🎲 สุ่มลุคเต็มตัววันนี้
                 </button>
 
-                <!-- RESULT OUTFIT -->
-                <div id="matcher-result" class="hidden bg-[#FAF7F2] p-6 rounded-3xl border border-[#EFECE6] text-center space-y-4">
-                    <h3 class="font-bold text-base text-gray-800"><i class="fa-solid fa-sparkles text-yellow-500 mr-1"></i> ชุดที่ระบบจัดให้คุณวันนี้!</h3>
-                    <div id="matcher-items-container" class="flex flex-wrap justify-center gap-4"></div>
-                    <button onclick="saveMatchedOutfit()" class="bg-[#8C6D53] text-white px-6 py-2 rounded-xl text-xs font-semibold">
-                        <i class="fa-solid fa-bookmark mr-1"></i> บันทึกลุคนี้เข้าปฏิทิน
+                <div id="match-result-box" class="hidden p-6 bg-[#FAF7F2] rounded-3xl border border-[#EFECE6] space-y-4">
+                    <h3 class="font-bold text-gray-800">🎉 ลุคที่สุ่มได้สำหรับคุณวันนี้</h3>
+
+                    <div id="outfit-display-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2"></div>
+
+                    <p id="match-text" class="text-xs text-gray-500 font-medium pt-2"></p>
+
+                    <button onclick="saveRandomOutfitToToday()" class="bg-[#E89387] hover:bg-[#d88276] text-white px-6 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm">
+                        📌 บันทึกลุคนี้ใส่ในวันนี้
                     </button>
                 </div>
             </div>
