@@ -135,14 +135,21 @@ function loginSuccess(username, displayName) {
 }
 
 function updateUserUI(displayName) {
-    document.getElementById('user-avatar-icon').className =
-        'w-7 h-7 bg-[#E89387] text-white rounded-full flex items-center justify-center text-xs font-bold';
+    const avatar = document.getElementById('user-avatar-icon');
+    if (avatar) {
+        avatar.className = 'w-7 h-7 bg-[#E89387] text-white rounded-full flex items-center justify-center text-xs font-bold';
+        avatar.innerText = displayName.charAt(0).toUpperCase();
+    }
 
-    document.getElementById('user-avatar-icon').innerText =
-        displayName.charAt(0).toUpperCase();
+    const nameLabel = document.getElementById('user-name-label');
+    if (nameLabel) nameLabel.innerText = displayName;
 
-    document.getElementById('user-name-label').innerText =
-        displayName;
+    const loginBtn = document.getElementById('btn-login-trigger');
+    if (loginBtn) {
+        loginBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ';
+        loginBtn.className = 'bg-rose-500 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm';
+        loginBtn.onclick = handleLogout;
+    }
 
     if (typeof initUserDropdownState === 'function') initUserDropdownState();
 }
@@ -153,16 +160,28 @@ function handleLogout() {
     localStorage.removeItem('wardrobe_current_user');
     localStorage.removeItem('wardrobe_display_name');
 
-    showPopup('👋 ออกจากระบบเรียบร้อย', () => {
-        document.getElementById('user-avatar-icon').className =
-            'w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center text-xs';
+    const avatar = document.getElementById('user-avatar-icon');
+    if (avatar) {
+        avatar.className = 'w-7 h-7 bg-[#F3ECE4] text-[#8C6D53] rounded-full flex items-center justify-center text-xs font-bold';
+        avatar.innerHTML = '<i class="fa-solid fa-user"></i>';
+    }
 
-        document.getElementById('user-avatar-icon').innerText = '👤';
+    const nameLabel = document.getElementById('user-name-label');
+    if (nameLabel) nameLabel.innerText = 'ผู้เยี่ยมชม';
 
-        document.getElementById('user-name-label').innerText =
-            'ผู้เยี่ยมชม';
+    const loginBtn = document.getElementById('btn-login-trigger');
+    if (loginBtn) {
+        loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ';
+        loginBtn.className = 'bg-[#8C6D53] hover:bg-[#755a43] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm';
+        loginBtn.onclick = () => switchPage('login');
+    }
 
-        if (typeof initUserDropdownState === 'function') initUserDropdownState();
+    if (typeof showPopup === 'function') {
+        showPopup('👋 ออกจากระบบเรียบร้อย', () => {
+            switchPage('home');
+        });
+    } else {
+        alert('👋 ออกจากระบบเรียบร้อย');
         switchPage('home');
-    });
+    }
 }
