@@ -3,10 +3,15 @@ let popupCallback = null;
 let selectedDateKey = null;
 let currentRandomOutfitItems = [];
 
-let calendarOutfits =
+// ทำให้เป็น global variable เพื่อให้ไฟล์อื่นเข้าถึงได้
+window.calendarOutfits =
     JSON.parse(localStorage.getItem('wardrobe_calendar')) || {};
 
-let closetItems =
+// alias สำหรับใช้ในไฟล์นี้
+let calendarOutfits = window.calendarOutfits;
+
+// ทำให้เป็น global variable เพื่อให้ไฟล์อื่นเข้าถึงได้
+window.closetItems =
     JSON.parse(localStorage.getItem('wardrobe_items')) || [
         {
             id: 1,
@@ -21,6 +26,9 @@ let closetItems =
             image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300'
         }
     ];
+
+// alias สำหรับใช้ในไฟล์นี้
+let closetItems = window.closetItems;
 
 window.addEventListener('DOMContentLoaded', () => {
     if (typeof checkActiveSession === 'function') checkActiveSession();

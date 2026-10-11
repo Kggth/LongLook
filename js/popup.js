@@ -23,7 +23,15 @@ function showPopup(msg, cb = null) {
     const popupEl = document.getElementById('custom-popup');
 
     if (msgEl && popupEl) {
-        msgEl.innerText = msg;
+        // ถ้าข้อความขึ้นต้นด้วยอีโมจิที่ขึ้นบรรทัดใหม่ ให้ทำให้ใหญ่ขึ้น
+        if (msg.match(/^[\u{1F300}-\u{1F9FF}]/u)) {
+            const lines = msg.split('\n');
+            const emoji = lines[0];
+            const text = lines.slice(1).join('\n');
+            msgEl.innerHTML = `<div class="text-4xl mb-2">${emoji}</div><div class="text-sm">${text}</div>`;
+        } else {
+            msgEl.innerText = msg;
+        }
         popupEl.classList.remove('hidden');
         popupCallback = cb;
     } else {
