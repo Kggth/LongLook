@@ -48,7 +48,6 @@ function addNewItem() {
 }
 
 function saveItemToCloset(name, category, image) {
-
     closetItems.push({
         id: Date.now(),
         name: name,
@@ -61,15 +60,24 @@ function saveItemToCloset(name, category, image) {
         JSON.stringify(closetItems)
     );
 
-    closeModal();
+    if (typeof closeModal === 'function') closeModal();
+    if (typeof closeAddClothModal === 'function') closeAddClothModal();
 
-    document.getElementById('item-name').value = '';
+    const nameInput = document.getElementById('item-name') || document.getElementById('cloth-name');
+    if (nameInput) nameInput.value = '';
 
-    document.getElementById('item-image-file').value = '';
+    const fileInput = document.getElementById('item-image-file') || document.getElementById('cloth-image');
+    if (fileInput) fileInput.value = '';
 
     renderCloset();
 
-    showPopup('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+    if (typeof populateBuilderOptions === 'function') populateBuilderOptions();
+
+    if (typeof showPopup === 'function') {
+        showPopup('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+    } else {
+        alert('🎉 เพิ่มเสื้อผ้าสำเร็จ!');
+    }
 }
 
 function deleteItem(id) {

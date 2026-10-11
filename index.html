@@ -591,18 +591,10 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     saveItemToCloset(name, category, evt.target.result);
-                    closeAddClothModal();
-                    if (typeof showPopup === 'function') {
-                        showPopup('👕 เพิ่มเสื้อผ้าเข้าตู้เรียบร้อยแล้ว!');
-                    } else {
-                        alert('เพิ่มเสื้อผ้าเรียบร้อยแล้ว!');
-                    }
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 saveItemToCloset(name, category, 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300');
-                closeAddClothModal();
-                alert('เพิ่มเสื้อผ้าเรียบร้อยแล้ว!');
             }
         }
 
