@@ -144,29 +144,32 @@ function deleteItem(id) {
 
 function renderCloset() {
 
-    const fullGrid =
-        document.getElementById('full-closet-grid');
+    const fullGrid = document.getElementById('full-closet-grid') || document.getElementById('closet-grid');
+    const homePreview = document.getElementById('home-closet-preview');
 
-    const homePreview =
-        document.getElementById('home-closet-preview');
+    const catFilter = document.getElementById('filter-category')?.value || 'ALL';
+    const keyword = document.getElementById('search-keyword')?.value?.trim().toLowerCase() || '';
+
+    let itemsToRender = closetItems;
+    if (catFilter !== 'ALL') {
+        itemsToRender = itemsToRender.filter(i => i.category === catFilter);
+    }
+    if (keyword) {
+        itemsToRender = itemsToRender.filter(i => i.name.toLowerCase().includes(keyword));
+    }
 
     let htmlContent = '';
 
-    if (closetItems.length === 0) {
-
+    if (itemsToRender.length === 0) {
         htmlContent = `
             <p class="text-xs text-gray-400 col-span-full text-center py-6">
-                ยังไม่มีเสื้อผ้าในตู้ กดเพิ่มเสื้อผ้ากันเลย!
+                ยังไม่มีเสื้อผ้าในหมวดนี้ หรือไม่พบไอเทมที่ค้นหา
             </p>
         `;
-
     } else {
-
-        closetItems.forEach(item => {
-
+        itemsToRender.forEach(item => {
             htmlContent += `
-                <div class="bg-white p-4 rounded-2xl border border-[#EAE6DF] text-center relative group">
-
+                <div class="bg-white p-4 rounded-2xl border border-[#EAE6DF] text-center relative group shadow-sm transition hover:shadow-md">
                     <button
                         onclick="deleteItem(${item.id})"
                         class="absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-500 w-7 h-7 rounded-full text-xs flex items-center justify-center transition"
@@ -176,22 +179,20 @@ function renderCloset() {
                     </button>
 
                     <div class="h-36 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
-
                         <img
                             src="${item.image}"
                             class="h-full w-full object-contain"
+                            alt="${item.name}"
                         >
-
                     </div>
 
-                    <h4 class="font-bold text-sm mt-2 text-gray-800">
+                    <h4 class="font-bold text-sm mt-2 text-gray-800 truncate">
                         ${item.name}
                     </h4>
 
-                    <p class="text-xs text-gray-400">
+                    <span class="inline-block bg-[#F3ECE4] text-[#8C6D53] text-[10px] px-2 py-0.5 rounded-md font-semibold mt-1">
                         ${item.category}
-                    </p>
-
+                    </span>
                 </div>
             `;
         });
@@ -199,6 +200,11 @@ function renderCloset() {
 
     if (fullGrid) {
         fullGrid.innerHTML = htmlContent;
+    }
+
+    const closetGridAlt = document.getElementById('closet-grid');
+    if (closetGridAlt && closetGridAlt !== fullGrid) {
+        closetGridAlt.innerHTML = htmlContent;
     }
 
     if (homePreview) {
