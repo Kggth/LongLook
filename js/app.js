@@ -23,11 +23,10 @@ let closetItems =
     ];
 
 window.addEventListener('DOMContentLoaded', () => {
-    checkActiveSession();
-    initRealCalendar();
-    fetchRealWeather();
-    renderCloset();
-    initUserDropdownState();
+    if (typeof checkActiveSession === 'function') checkActiveSession();
+    if (typeof initRealCalendar === 'function') initRealCalendar();
+    if (typeof updateWeather === 'function') updateWeather();
+    if (typeof renderCloset === 'function') renderCloset();
 
     window.addEventListener('click', (e) => {
         const container = document.getElementById('user-profile-container');

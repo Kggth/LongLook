@@ -43,7 +43,7 @@ function switchPage(pageId) {
     }
 
     if (pageId === 'settings-profile') {
-        loadProfileDataIntoForm();
+        if (typeof loadProfileDataIntoForm === 'function') loadProfileDataIntoForm();
     }
 
     window.scrollTo(0, 0);

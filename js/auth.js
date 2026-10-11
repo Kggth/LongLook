@@ -160,7 +160,7 @@ function updateUserUI(displayName) {
     document.getElementById('user-name-label').innerText =
         displayName;
 
-    initUserDropdownState();
+    if (typeof initUserDropdownState === 'function') initUserDropdownState();
 }
 
 function handleLogout() {
@@ -178,7 +178,7 @@ function handleLogout() {
         document.getElementById('user-name-label').innerText =
             'ผู้เยี่ยมชม';
 
-        initUserDropdownState();
+        if (typeof initUserDropdownState === 'function') initUserDropdownState();
         switchPage('home');
     });
 }
