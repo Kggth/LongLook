@@ -85,7 +85,7 @@
                     <span class="w-7 h-7 bg-[#F3ECE4] text-[#8C6D53] rounded-full flex items-center justify-center text-xs font-bold" id="user-avatar-icon"><i class="fa-solid fa-user"></i></span>
                     <span class="text-xs md:text-sm font-semibold text-gray-700" id="user-name-label">ผู้เยี่ยมชม</span>
                 </div>
-                <button id="btn-login-trigger" onclick="openLoginModal()" class="bg-[#8C6D53] hover:bg-[#755a43] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm">
+                <button id="btn-login-trigger" onclick="switchPage('login')" class="bg-[#8C6D53] hover:bg-[#755a43] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm">
                     <i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ
                 </button>
             </div>
@@ -333,6 +333,102 @@
                 <div class="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6] text-center">
                     <p class="text-xs text-gray-400">สไตล์ที่แต่งบ่อยที่สุด</p>
                     <h3 id="stat-top-style" class="text-xl font-bold text-[#E89387] mt-1">CASUAL</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: LOGIN -->
+        <div id="page-login" class="page-content flex justify-center items-center py-12 hidden">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-[#EAE6DF] w-full max-w-md space-y-4">
+
+                <h2 class="text-xl font-bold text-center">เข้าสู่ระบบ</h2>
+
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            ชื่อผู้ใช้ (Username)
+                        </label>
+
+                        <input type="text" id="login-user" placeholder="กรอกชื่อผู้ใช้" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            รหัสผ่าน (Password)
+                        </label>
+
+                        <input type="password" id="login-pass" placeholder="กรอกรหัสผ่าน" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-3 rounded-xl text-sm font-semibold transition shadow-sm">
+                        เข้าสู่ระบบ
+                    </button>
+                </form>
+
+                <div class="text-center pt-2 border-t border-gray-100">
+                    <p class="text-xs text-gray-500">
+                        ยังไม่มีบัญชีใช่ไหม?
+                        <span onclick="switchPage('register')" class="text-[#E89387] font-semibold cursor-pointer hover:underline">
+                            สมัครสมาชิกที่นี่
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: REGISTER -->
+        <div id="page-register" class="page-content flex justify-center items-center py-12 hidden">
+            <div class="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm w-full max-w-md space-y-4">
+
+                <h2 class="text-xl font-bold text-center">สมัครสมาชิกใหม่</h2>
+
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            ชื่อผู้ใช้สำหรับเข้าสู่ระบบ (Username)
+                        </label>
+
+                        <input type="text" id="reg-user" placeholder="เช่น user123" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            ชื่อที่แสดงในแอคเคานต์ (Account Name)
+                        </label>
+
+                        <input type="text" id="reg-display-name" placeholder="เช่น น้องฟ้าใส / คุณแม่บ้าน" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            ตั้งรหัสผ่าน (Password)
+                        </label>
+
+                        <input type="password" id="reg-pass" placeholder="กรอกรหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            ยืนยันรหัสผ่าน (Confirm Password)
+                        </label>
+
+                        <input type="password" id="reg-pass-confirm" placeholder="กรอกรหัสผ่านอีกครั้ง" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-3 rounded-xl text-sm font-semibold transition shadow-sm">
+                        สมัครสมาชิก
+                    </button>
+                </form>
+
+                <div class="text-center pt-2 border-t border-gray-100">
+                    <p class="text-xs text-gray-500">
+                        มีบัญชีอยู่แล้ว?
+                        <span onclick="switchPage('login')" class="text-[#E89387] font-semibold cursor-pointer hover:underline">
+                            เข้าสู่ระบบที่นี่
+                        </span>
+                    </p>
                 </div>
             </div>
         </div>
