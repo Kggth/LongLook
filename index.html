@@ -312,10 +312,30 @@
         </div>
 
         <!-- PAGE 5: CALENDAR -->
-        <div id="page-calendar" class="page-content hidden bg-white p-8 rounded-3xl border border-[#EAE6DF] space-y-4">
-            <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-calendar-days text-[#8C6D53] mr-2"></i> ปฏิทินแต่งตัว (LOG & PLANNER)</h2>
-            <p class="text-xs text-gray-400">บันทึกประวัติและวางแผนชุดแต่งตัวเพื่อป้องกันการใส่ชุดซ้ำ</p>
-            <div id="calendar-log-list" class="space-y-2"></div>
+        <div id="page-calendar" class="page-content space-y-6 hidden">
+            <h2 class="text-2xl font-bold">📅 ปฏิทินแต่งตัว</h2>
+
+            <div class="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 id="full-calendar-title" class="font-bold text-lg text-gray-800"></h3>
+
+                    <span class="text-xs text-gray-400">
+                        คลิกที่วันเพื่อดูประวัติ หรือวางแผนชุดวันถัดไป
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 gap-2">
+                    <span>อา</span>
+                    <span>จ</span>
+                    <span>อ</span>
+                    <span>พ</span>
+                    <span>พฤ</span>
+                    <span>ศ</span>
+                    <span>ส</span>
+                </div>
+
+                <div id="full-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+            </div>
         </div>
 
         <!-- PAGE 6: STATS -->
@@ -434,6 +454,38 @@
         </div>
 
     </main>
+
+    <!-- MODAL ปฏิทิน: จัดการชุดประจำวัน -->
+    <div id="day-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 md:p-8 rounded-3xl w-full max-w-lg shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="modal-day-title" class="text-lg font-bold text-gray-800">
+                    จัดการชุดประจำวัน
+                </h3>
+                <button onclick="closeDayModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs text-gray-500">
+                    ชุดที่ใส่หรือวางแผนไว้สำหรับวันนี้:
+                </p>
+                <div id="modal-outfit-list" class="flex flex-wrap gap-2 min-h-[60px] p-3 bg-[#FAF7F2] rounded-2xl border border-[#EFECE6] items-center"></div>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <p class="text-xs font-semibold text-gray-700">
+                    เลือกไอเทมจากตู้เพื่อใส่ในวันนี้:
+                </p>
+                <div id="modal-closet-selector" class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1"></div>
+            </div>
+
+            <button onclick="closeDayModal()" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                เสร็จสิ้น
+            </button>
+        </div>
+    </div>
 
     <!-- MODAL: ADD CLOTH -->
     <div id="add-cloth-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
