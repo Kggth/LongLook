@@ -1,5 +1,4 @@
 function openModal() {
-
     if (!isLoggedIn) {
         showPopup(
             '🔒 กรุณาเข้าสู่ระบบก่อนเพิ่มเสื้อผ้า',
@@ -10,30 +9,34 @@ function openModal() {
         return;
     }
 
-    document.getElementById('upload-modal')
-        .classList.remove('hidden');
+    const modal = document.getElementById('upload-modal') || document.getElementById('add-cloth-modal');
+    if (modal) modal.classList.remove('hidden');
 }
 
 function closeModal() {
-    document.getElementById('upload-modal')
-        .classList.add('hidden');
+    const modal = document.getElementById('upload-modal') || document.getElementById('add-cloth-modal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function showPopup(msg, cb = null) {
+    const msgEl = document.getElementById('popup-message');
+    const popupEl = document.getElementById('custom-popup');
 
-    document.getElementById('popup-message')
-        .innerText = msg;
-
-    document.getElementById('custom-popup')
-        .classList.remove('hidden');
-
-    popupCallback = cb;
+    if (msgEl && popupEl) {
+        msgEl.innerText = msg;
+        popupEl.classList.remove('hidden');
+        popupCallback = cb;
+    } else {
+        alert(msg);
+        if (cb) cb();
+    }
 }
 
 function closePopup() {
-
-    document.getElementById('custom-popup')
-        .classList.add('hidden');
+    const popupEl = document.getElementById('custom-popup');
+    if (popupEl) {
+        popupEl.classList.add('hidden');
+    }
 
     if (popupCallback) {
         popupCallback();
