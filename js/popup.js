@@ -43,7 +43,12 @@ function showPopup(msg, cb = null) {
 function closePopup() {
     const popupEl = document.getElementById('custom-popup');
     if (popupEl) {
-        popupEl.classList.add('hidden');
+        // เพิ่ม fade out animation ก่อนปิด
+        popupEl.style.animation = 'fadeOut 0.2s ease-out';
+        setTimeout(() => {
+            popupEl.classList.add('hidden');
+            popupEl.style.animation = ''; // reset animation
+        }, 200);
     }
 
     if (popupCallback) {
