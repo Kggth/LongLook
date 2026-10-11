@@ -78,7 +78,7 @@ function compressImage(base64Str, maxWidth = 400, maxHeight = 400) {
     });
 }
 
-async function saveItemToCloset(name, category, image) {
+async function saveItemToCloset(name, category, image, style) {
     try {
         let finalImage = image;
         if (image && image.startsWith('data:image')) {
@@ -89,7 +89,8 @@ async function saveItemToCloset(name, category, image) {
             id: Date.now(),
             name: name,
             category: category,
-            image: finalImage
+            image: finalImage,
+            style: style || ''
         };
 
         closetItems.push(newItem);

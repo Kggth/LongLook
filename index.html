@@ -558,6 +558,7 @@
             e.preventDefault();
             const name = document.getElementById('cloth-name').value.trim();
             const category = document.getElementById('cloth-category').value;
+            const style = document.getElementById('cloth-style') ? document.getElementById('cloth-style').value : '';
             const fileInput = document.getElementById('cloth-image');
 
             if (!name) return alert('กรุณากรอกชื่อเสื้อผ้า');
@@ -565,11 +566,40 @@
             if (fileInput && fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    saveItemToCloset(name, category, evt.target.result);
+                    saveItemToCloset(name, category, evt.target.result, style);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                saveItemToCloset(name, category, 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300');
+                saveItemToCloset(name, category, 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300', style);
+            }
+        }
+
+        // Update Stats from real data
+        function updateStats() {
+            // จำนวนเสื้อผ้าในตู้
+            const totalEl = document.getElementById('stat-total-clothes');
+            if (totalEl) totalEl.innerText = closetItems.length;
+
+            // จำนวน OUTFIT ที่สร้าง (นับ entry ใน calendarOutfits)
+            const totalOutfits = Object.keys(calendarOutfits).length;
+            const outfitsEl = document.getElementById('stat-total-outfits');
+            if (outfitsEl) outfitsEl.innerText = totalOutfits;
+
+            // สไตล์ที่แต่งบ่อยที่สุด
+            const styleEl = document.getElementById('stat-top-style');
+            if (styleEl) {
+                if (closetItems.length === 0 && totalOutfits === 0) {
+                    styleEl.innerText = '-';
+                } else {
+                    const styleCounts = {};
+                    closetItems.forEach(item => {
+                        if (item.style) {
+                            styleCounts[item.style] = (styleCounts[item.style] || 0) + 1;
+                        }
+                    });
+                    const topStyle = Object.keys(styleCounts).sort((a, b) => styleCounts[b] - styleCounts[a])[0];
+                    styleEl.innerText = topStyle || '-';
+                }
             }
         }
 
@@ -621,7 +651,8 @@
             const topId = document.getElementById('builder-top')?.value;
             const bottomId = document.getElementById('builder-bottom')?.value;
             if (!topId && !bottomId) {
-                return alert('⚠️ กฎทางธุรกิจ: ต้องเลือกเสื้อหรือกางเกงอย่างน้อย 1 ชิ้นเพื่อสร้างชุด');
+                showPopup('⚠️\nต้องเลือกเสื้อหรือกางเกง\nอย่างน้อย 1 ชิ้นเพื่อสร้างชุด');
+                return;
             }
 
             const today = new Date().toISOString().split('T')[0];
@@ -630,8 +661,9 @@
                 savedAt: new Date().toISOString()
             };
             localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
-            alert('🎉 บันทึก OUTFIT ของคุณลงปฏิทินสำเร็จแล้ว!');
-            switchPage('calendar');
+            showPopup('🎉\nบันทึก OUTFIT ของคุณ\nลงปฏิทินสำเร็จแล้ว!', () => {
+                switchPage('calendar');
+            });
         }
 
         // Initialize Everything

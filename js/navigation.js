@@ -38,8 +38,45 @@ function switchPage(pageId) {
     }
 
     if (pageId === 'stats') {
-        document.getElementById('stat-total').innerText =
-            closetItems.length + ' ไอเทมในตู้';
+        // อ่านจากตัวแปร global (ไม่ได้เก็บใน localStorage)
+        const items = window.closetItems || [];
+        const outfits = window.calendarOutfits || {};
+        
+        // อัปเดตจำนวนเสื้อผ้า
+        const totalClothes = document.getElementById('stat-total-clothes');
+        if (totalClothes) {
+            totalClothes.textContent = items.length;
+        }
+        
+        // อัปเดตจำนวน outfit (นับจำนวน key ใน calendarOutfits)
+        const totalOutfits = document.getElementById('stat-total-outfits');
+        if (totalOutfits) {
+            totalOutfits.textContent = Object.keys(outfits).length;
+        }
+        
+        // คำนวณ style ที่ใช้บ่อยที่สุด
+        const topStyle = document.getElementById('stat-top-style');
+        if (topStyle) {
+            if (items.length === 0) {
+                topStyle.textContent = '-';
+            } else {
+                const styleCounts = {};
+                items.forEach(item => {
+                    const style = item.style || 'CASUAL';
+                    styleCounts[style] = (styleCounts[style] || 0) + 1;
+                });
+                
+                let maxStyle = 'CASUAL';
+                let maxCount = 0;
+                for (const [style, count] of Object.entries(styleCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        maxStyle = style;
+                    }
+                }
+                topStyle.textContent = maxStyle;
+            }
+        }
     }
 
     if (pageId === 'settings-profile') {
