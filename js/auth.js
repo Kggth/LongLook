@@ -1,11 +1,9 @@
 function checkActiveSession() {
-    const savedUser =
-        localStorage.getItem('wardrobe_current_user');
+    const savedUser = localStorage.getItem('wardrobe_current_user');
+    const displayName = localStorage.getItem('wardrobe_display_name');
+    const token = localStorage.getItem('wardrobe_token');
 
-    const displayName =
-        localStorage.getItem('wardrobe_display_name');
-
-    if (savedUser) {
+    if (savedUser && token) {
         isLoggedIn = true;
         updateUserUI(displayName || savedUser);
     }
@@ -34,70 +32,59 @@ async function handleRegister(event) {
         return;
     }
 
-    // เซฟลง localStorage (Offline Fallback เพื่อให้ใช้งานได้ทันที 100%)
-    let users = JSON.parse(localStorage.getItem('wardrobe_users')) || [];
-    if (users.some(u => u.username === username)) {
-        alert('ชื่อผู้ใช้นี้ (Username) ถูกใช้งานไปแล้ว');
-        return;
-    }
-
-    users.push({ username, displayName, password });
-    localStorage.setItem('wardrobe_users', JSON.stringify(users));
-
-    // พยายาม Sync กับ Backend หาก Backend กำลังรันอยู่
     try {
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:5000/api/auth/register'
-            : 'https://longlook-backend.onrender.com/api/auth/register';
-
-        fetch(apiUrl, {
+        const apiUrl = `${getApiBaseUrl()}/api/auth/register`;
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, displayName, password })
-        }).catch(() => {});
-    } catch (e) {}
-
-    document.getElementById('reg-user').value = '';
-    document.getElementById('reg-display-name').value = '';
-    document.getElementById('reg-pass').value = '';
-    document.getElementById('reg-pass-confirm').value = '';
-
-    if (typeof showPopup === 'function') {
-        showPopup('🎉 สมัครสมาชิกสำเร็จ!', () => {
-            loginSuccess(username, displayName);
         });
-    } else {
-        alert('🎉 สมัครสมาชิกสำเร็จ!');
-        loginSuccess(username, displayName);
+
+        const data = await response.json();
+
+        if (response.ok && data.token) {
+            localStorage.setItem('wardrobe_token', data.token);
+
+            document.getElementById('reg-user').value = '';
+            document.getElementById('reg-display-name').value = '';
+            document.getElementById('reg-pass').value = '';
+            document.getElementById('reg-pass-confirm').value = '';
+
+            if (typeof showPopup === 'function') {
+                showPopup('🎉 สมัครสมาชิกและบันทึกลง Oracle สำเร็จ!', () => {
+                    loginSuccess(username, displayName);
+                });
+            } else {
+                alert('🎉 สมัครสมาชิกสำเร็จ!');
+                loginSuccess(username, displayName);
+            }
+            return;
+        } else {
+            alert(data.message || 'ไม่สามารถลงทะเบียนได้');
+            return;
+        }
+    } catch (err) {
+        console.error('Register API Error:', err);
+        alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend ได้ กรุณาตรวจสอบว่ารัน backend ไว้ที่พอร์ต 5000 หรือไม่');
     }
 }
 
 async function handleLogin(event) {
     event.preventDefault();
 
-    const username = document.getElementById('login-user').value.trim();
-    const password = document.getElementById('login-pass').value;
+    const usernameInput = document.getElementById('login-user') || document.getElementById('login-username');
+    const passwordInput = document.getElementById('login-pass') || document.querySelector('#login-modal input[type="password"]');
+
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
 
     if (!username || !password) {
         alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
         return;
     }
 
-    // 1. ตรวจสอบจาก Local Storage (Offline Mode)
-    let users = JSON.parse(localStorage.getItem('wardrobe_users')) || [];
-    let foundUser = users.find(u => u.username === username && u.password === password);
-
-    if (foundUser) {
-        loginSuccess(foundUser.username, foundUser.displayName || foundUser.username);
-        return;
-    }
-
-    // 2. ถ้าใน Local ไม่มี ให้ลองยิงถาม Backend Server
     try {
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:5000/api/auth/login'
-            : 'https://longlook-backend.onrender.com/api/auth/login';
-
+        const apiUrl = `${getApiBaseUrl()}/api/auth/login`;
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -105,32 +92,40 @@ async function handleLogin(event) {
         });
 
         const data = await response.json();
-        if (response.ok && data.user) {
-            loginSuccess(data.user.username, data.user.displayName || data.user.username);
+
+        if (response.ok && data.token) {
+            localStorage.setItem('wardrobe_token', data.token);
+            if (typeof closeLoginModal === 'function') closeLoginModal();
+            const userDisplay = (data.user && data.user.displayName) ? data.user.displayName : username;
+            loginSuccess(username, userDisplay);
+            return;
+        } else {
+            alert(data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
             return;
         }
-    } catch (e) {}
-
-    // 3. Demo Fallback: ให้ผู้ใช้เข้าสู่ระบบได้ทันที
-    alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (หากเพิ่งใช้งาน ให้กด "สมัครสมาชิก" ก่อนนะครับ)');
+    } catch (err) {
+        console.error('Login API Error:', err);
+        alert(`⚠️ ไม่สามารถเชื่อมต่อ Backend (${getApiBaseUrl()}) ได้\nกรุณาตรวจสอบว่าเซิร์ฟเวอร์รันอยู่ที่พอร์ต 5000 (npm start) หรือไม่`);
+    }
 }
 
 function loginSuccess(username, displayName) {
     isLoggedIn = true;
 
-    localStorage.setItem(
-        'wardrobe_current_user',
-        username
-    );
-
-    localStorage.setItem(
-        'wardrobe_display_name',
-        displayName
-    );
+    localStorage.setItem('wardrobe_current_user', username);
+    localStorage.setItem('wardrobe_display_name', displayName);
 
     showPopup(`💜 ยินดีต้อนรับคุณ ${displayName}`, () => {
         updateUserUI(displayName);
         switchPage('home');
+
+        // โหลดข้อมูลเสื้อผ้าและปฏิทินของผู้ใช้นี้จาก Oracle Database
+        if (typeof loadUserClothesFromBackend === 'function') {
+            loadUserClothesFromBackend();
+        }
+        if (typeof loadCalendarFromBackend === 'function') {
+            loadCalendarFromBackend();
+        }
     });
 }
 
@@ -157,8 +152,18 @@ function updateUserUI(displayName) {
 function handleLogout() {
     isLoggedIn = false;
 
+    localStorage.removeItem('wardrobe_token');
     localStorage.removeItem('wardrobe_current_user');
     localStorage.removeItem('wardrobe_display_name');
+
+    // เคลียร์ตู้เสื้อผ้าและปฏิทินในหน่วยความจำ
+    window.closetItems = [];
+    closetItems = [];
+    window.calendarOutfits = {};
+    calendarOutfits = {};
+
+    renderCloset();
+    if (typeof initRealCalendar === 'function') initRealCalendar();
 
     const avatar = document.getElementById('user-avatar-icon');
     if (avatar) {

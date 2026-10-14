@@ -554,23 +554,30 @@
         }
 
         // Handle Add Cloth from Modal
-        function handleAddCloth(e) {
+        async function handleAddCloth(e) {
             e.preventDefault();
             const name = document.getElementById('cloth-name').value.trim();
             const category = document.getElementById('cloth-category').value;
+            const color = document.getElementById('cloth-color') ? document.getElementById('cloth-color').value.trim() : '';
             const style = document.getElementById('cloth-style') ? document.getElementById('cloth-style').value : '';
             const fileInput = document.getElementById('cloth-image');
 
             if (!name) return alert('กรุณากรอกชื่อเสื้อผ้า');
 
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('category', category);
+            formData.append('color', color);
+            formData.append('style', style);
+
             if (fileInput && fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    saveItemToCloset(name, category, evt.target.result, style);
-                };
-                reader.readAsDataURL(fileInput.files[0]);
+                formData.append('image', fileInput.files[0]);
             } else {
-                saveItemToCloset(name, category, 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300', style);
+                formData.append('imageUrl', 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300');
+            }
+
+            if (typeof saveItemToClosetApi === 'function') {
+                await saveItemToClosetApi(formData);
             }
         }
 
@@ -647,23 +654,60 @@
             `).join('');
         }
 
-        function saveManualOutfit() {
-            const topId = document.getElementById('builder-top')?.value;
-            const bottomId = document.getElementById('builder-bottom')?.value;
-            if (!topId && !bottomId) {
-                showPopup('⚠️\nต้องเลือกเสื้อหรือกางเกง\nอย่างน้อย 1 ชิ้นเพื่อสร้างชุด');
+        async function saveManualOutfit() {
+            const token = localStorage.getItem('wardrobe_token');
+            if (!token) {
+                showPopup('🔒 กรุณาเข้าสู่ระบบก่อนสร้างชุด OUTFIT เพื่อบันทึกลงใน Oracle Database', () => {
+                    if (typeof switchPage === 'function') switchPage('login');
+                });
                 return;
             }
 
-            const today = new Date().toISOString().split('T')[0];
-            calendarOutfits[today] = {
-                items: [topId, bottomId, document.getElementById('builder-shoes')?.value].filter(Boolean),
-                savedAt: new Date().toISOString()
-            };
-            localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
-            showPopup('🎉\nบันทึก OUTFIT ของคุณ\nลงปฏิทินสำเร็จแล้ว!', () => {
-                switchPage('calendar');
-            });
+            const topId = document.getElementById('builder-top')?.value;
+            const bottomId = document.getElementById('builder-bottom')?.value;
+            const shoesId = document.getElementById('builder-shoes')?.value;
+
+            if (!topId && !bottomId && !shoesId) {
+                showPopup('⚠️\nต้องเลือกเสื้อผ้าอย่างน้อย 1 ชิ้นเพื่อสร้างชุด');
+                return;
+            }
+
+            const itemIds = [topId, bottomId, shoesId].filter(Boolean).map(id => parseInt(id, 10));
+
+            try {
+                const response = await fetch(`${getApiBaseUrl()}/api/outfits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        outfit_name: 'ลุคสร้างเอง (Outfit Builder)',
+                        description: 'ชุดแต่งกายที่ประกอบจากหน้า OUTFIT BUILDER',
+                        items: itemIds,
+                        log_to_calendar: true
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const selectedItems = closetItems.filter(it => itemIds.includes(parseInt(it.id, 10)));
+                    calendarOutfits[today] = selectedItems;
+                    window.calendarOutfits = calendarOutfits;
+                    localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
+
+                    if (typeof initRealCalendar === 'function') initRealCalendar();
+                    showPopup('🎉\nบันทึก OUTFIT ลงใน Oracle Database สำเร็จแล้ว!', () => {
+                        switchPage('calendar');
+                    });
+                } else {
+                    alert(data.message || 'ไม่สามารถบันทึก OUTFIT ลงฐานข้อมูลได้');
+                }
+            } catch (err) {
+                console.error('Save manual outfit error:', err);
+                alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึก OUTFIT ได้: ' + err.message);
+            }
         }
 
         // Initialize Everything

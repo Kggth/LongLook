@@ -371,9 +371,8 @@ function saveTodayOutfit() {
     );
 }
 
-function saveRandomOutfitToToday() {
-
-    if (!isLoggedIn) {
+async function saveRandomOutfitToToday() {
+    if (!isLoggedIn || !localStorage.getItem('wardrobe_token')) {
         showPopup(
             '🔒 กรุณาเข้าสู่ระบบก่อนบันทึกลุค',
             () => {
@@ -383,36 +382,79 @@ function saveRandomOutfitToToday() {
         return;
     }
 
-    if (currentRandomOutfitItems.length === 0) {
-        showPopup(
-            '❌ ยังไม่มีลุคที่สุ่มได้ กรุณาสุ่มชุดก่อนบันทึก'
-        );
+    if (!currentRandomOutfitItems || currentRandomOutfitItems.length === 0) {
+        showPopup('❌ ยังไม่มีลุคที่สุ่มได้ กรุณาสุ่มชุดก่อนบันทึก');
         return;
     }
 
-    const now = new Date();
+    const itemIds = currentRandomOutfitItems.map(i => i.id);
 
-    const currentYear =
-        now.getFullYear();
+    try {
+        const response = await fetch(`${getApiBaseUrl()}/api/outfits`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
+            body: JSON.stringify({
+                outfit_name: 'ลุคสุ่มประจำวัน',
+                description: 'สุ่มจากตู้เสื้อผ้า LongLook',
+                items: itemIds,
+                log_to_calendar: true
+            })
+        });
 
-    const monthStr =
-        String(now.getMonth() + 1).padStart(2, '0');
+        const data = await response.json();
+        if (response.ok) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            const dayStr = String(now.getDate()).padStart(2, '0');
+            const todayKey = `${currentYear}-${monthStr}-${dayStr}`;
 
-    const dayStr =
-        String(now.getDate()).padStart(2, '0');
+            calendarOutfits[todayKey] = [...currentRandomOutfitItems];
+            window.calendarOutfits = calendarOutfits;
+            localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
 
-    const todayKey =
-        `${currentYear}-${monthStr}-${dayStr}`;
+            if (typeof initRealCalendar === 'function') initRealCalendar();
+            showPopup('✨ บันทึกลุคสุ่มลงใน Oracle Database เรียบร้อยแล้ว!');
+        } else {
+            alert(data.message || 'ไม่สามารถบันทึกลุคลงฐานข้อมูลได้');
+        }
+    } catch (err) {
+        console.error('Save random outfit error:', err);
+        alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึกลุคได้: ' + err.message);
+    }
+}
 
-    calendarOutfits[todayKey] =
-        [...currentRandomOutfitItems];
+async function loadCalendarFromBackend() {
+    const token = localStorage.getItem('wardrobe_token');
+    if (!token) return;
 
-    localStorage.setItem(
-        'wardrobe_calendar',
-        JSON.stringify(calendarOutfits)
-    );
+    try {
+        const response = await fetch(`${getApiBaseUrl()}/api/calendar`, {
+            headers: getAuthHeaders()
+        });
 
-    showPopup(
-        '✨ บันทึกลุคที่สุ่มได้ลงในปฏิทินของวันนี้เรียบร้อยแล้ว!'
-    );
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                data.forEach(log => {
+                    if (log.date && log.items) {
+                        calendarOutfits[log.date] = log.items.map(it => ({
+                            id: it.id,
+                            name: it.name,
+                            category: it.category,
+                            image: typeof resolveImageUrl === 'function' ? resolveImageUrl(it.image) : it.image
+                        }));
+                    }
+                });
+                window.calendarOutfits = calendarOutfits;
+                localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
+                if (typeof initRealCalendar === 'function') initRealCalendar();
+            }
+        }
+    } catch (err) {
+        console.error('Failed to load calendar from backend:', err);
+    }
 }
