@@ -107,6 +107,16 @@ db.exec(`
     );
 `);
 
+// ตรวจสอบและเพิ่มคอลัมน์ใน calendar_logs อัตโนมัติหากมี DB เดิมอยู่แล้ว
+try {
+    const cols = db.prepare('PRAGMA table_info(calendar_logs)').all().map(c => c.name);
+    if (!cols.includes('outfit_id')) db.prepare('ALTER TABLE calendar_logs ADD COLUMN outfit_id INTEGER REFERENCES outfits(id) ON DELETE SET NULL').run();
+    if (!cols.includes('occasion')) db.prepare('ALTER TABLE calendar_logs ADD COLUMN occasion TEXT').run();
+    if (!cols.includes('weather')) db.prepare('ALTER TABLE calendar_logs ADD COLUMN weather TEXT').run();
+} catch (e) {
+    console.error('Migration error:', e);
+}
+
 // เติมข้อมูลตั้งต้น (Seed Initial Master Data)
 const initialCategories = ['เสื้อ', 'กางเกง', 'กระโปรง', 'เดรส', 'อื่นๆ'];
 for (const cat of initialCategories) {
