@@ -511,6 +511,10 @@ async function saveCurrentMatchToCalendar() {
     if (window.currentMatchedOutfit?.top) items.push(window.currentMatchedOutfit.top);
     if (window.currentMatchedOutfit?.bottom) items.push(window.currentMatchedOutfit.bottom);
 
+    const topTitle = window.currentMatchedOutfit?.top?.name || 'เสื้อ';
+    const bottomTitle = window.currentMatchedOutfit?.bottom?.name || 'กางเกง';
+    const outfitTitle = `${topTitle} + ${bottomTitle}`;
+
     try {
         const response = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
             method: 'POST',
@@ -519,7 +523,7 @@ async function saveCurrentMatchToCalendar() {
                 Authorization: `Bearer ${token}`
             },
             body: JSON.stringify({
-                title: `${topName} + ${bottomName}`,
+                title: outfitTitle,
                 style: 'สุ่มแมตช์ชุด',
                 image: topImg?.src || bottomImg?.src || '',
                 log_date: today,
@@ -528,8 +532,20 @@ async function saveCurrentMatchToCalendar() {
         });
         const data = await response.json();
         if (response.ok) {
+            // ซิงค์ลง calendarOutfits ในหน้าปฏิทินด้วย
+            if (typeof calendarOutfits !== 'undefined' && items.length > 0) {
+                if (!calendarOutfits[today]) calendarOutfits[today] = [];
+                items.forEach(it => {
+                    if (!calendarOutfits[today].some(existing => String(existing.id) === String(it.id))) {
+                        calendarOutfits[today].push(it);
+                    }
+                });
+                localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
+                if (typeof renderFullCalendar === 'function') renderFullCalendar();
+            }
+
             await loadCalendarHistory();
-            showLongLookToast('🎉 บันทึก Outfit และปฏิทินลง Database เรียบร้อยแล้ว!', 'success');
+            showLongLookToast('🎉 บันทึก Outfit ลงปฏิทินและ Database เรียบร้อยแล้ว!', 'success');
         } else {
             showLongLookToast(data.message || 'บันทึกไม่สำเร็จ', 'error');
         }
@@ -539,7 +555,7 @@ async function saveCurrentMatchToCalendar() {
     }
 }
 
-// บันทึกชุดจากหน้า Builder (สร้างลุคเอง) ลงปฏิทิน
+// บันทึกชุดจากหน้า Builder (สร้างลุคและจับคู่ใส่บนหุ่น) ลงปฏิทิน
 async function saveBuilderOutfitToCalendar() {
     const token = localStorage.getItem('longlook_token');
     if (!token) {
@@ -563,12 +579,12 @@ async function saveBuilderOutfitToCalendar() {
 
     const items = [];
     if (topSelect?.value) {
-        const topItem = closetItems.find(i => i.image === topSelect.value);
-        if (topItem) items.push(topItem);
+        const topItem = closetItems.find(i => i.image === topSelect.value) || { name: topText, image: topSelect.value };
+        items.push(topItem);
     }
     if (bottomSelect?.value) {
-        const bottomItem = closetItems.find(i => i.image === bottomSelect.value);
-        if (bottomItem) items.push(bottomItem);
+        const bottomItem = closetItems.find(i => i.image === bottomSelect.value) || { name: bottomText, image: bottomSelect.value };
+        items.push(bottomItem);
     }
 
     try {
@@ -588,8 +604,20 @@ async function saveBuilderOutfitToCalendar() {
         });
         const data = await response.json();
         if (response.ok) {
+            // ซิงค์ลง calendarOutfits ในหน้าปฏิทินด้วย
+            if (typeof calendarOutfits !== 'undefined' && items.length > 0) {
+                if (!calendarOutfits[today]) calendarOutfits[today] = [];
+                items.forEach(it => {
+                    if (!calendarOutfits[today].some(existing => String(existing.id) === String(it.id))) {
+                        calendarOutfits[today].push(it);
+                    }
+                });
+                localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
+                if (typeof renderFullCalendar === 'function') renderFullCalendar();
+            }
+
             await loadCalendarHistory();
-            showLongLookToast('💾 บันทึก Outfit ลงปฏิทินเรียบร้อยแล้ว!', 'success');
+            showLongLookToast('💾 บันทึกลุคนี้เข้าสู่ปฏิทินเรียบร้อยแล้ว!', 'success');
         } else {
             showLongLookToast(data.message || 'บันทึกไม่สำเร็จ', 'error');
         }
