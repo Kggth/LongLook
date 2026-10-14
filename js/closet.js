@@ -229,12 +229,12 @@ function renderClosetItems() {
     }
 
     closetGrid.innerHTML = closetItems.map(item => `
-        <div class="bg-[#FCE8E8] p-3 rounded-2xl border border-[#D8C2B0] text-center shadow-sm hover:scale-[1.02] transition-transform flex flex-col items-center relative group">
+        <div class="bg-[#FCE8E8] p-3 rounded-2xl border border-[#D8C2B0] text-center shadow-sm hover-lift flex flex-col items-center relative group">
             <button type="button" onclick="deleteClothItem(event, '${item.id || ''}')" title="ลบเสื้อผ้าชิ้นนี้" 
-                    class="absolute top-2 right-2 w-7 h-7 bg-white/90 hover:bg-red-500 hover:text-white text-gray-500 rounded-full border border-[#D8C2B0] flex items-center justify-center text-xs shadow-md transition z-10 cursor-pointer">
+                    class="absolute top-2 right-2 w-7 h-7 bg-white/90 hover:bg-red-500 hover:text-white text-gray-500 rounded-full border border-[#D8C2B0] flex items-center justify-center text-xs shadow-md transition-all duration-200 z-10 cursor-pointer opacity-90 group-hover:opacity-100 group-hover:scale-105">
                 <i class="fa-solid fa-trash-can pointer-events-none"></i>
             </button>
-            <div class="w-full h-40 bg-white rounded-xl mb-2 border border-[#D8C2B0] flex items-center justify-center p-2 overflow-hidden">
+            <div class="w-full h-40 bg-white rounded-xl mb-2 border border-[#D8C2B0] flex items-center justify-center p-2 overflow-hidden transition-transform duration-300 group-hover:scale-[1.03]">
                 <img src="${item.image}" class="max-w-full max-h-full object-contain" alt="${item.name}">
             </div>
             <h4 class="font-bold text-xs text-[#3D2B1F] truncate w-full" title="${item.name}">${item.name}</h4>
@@ -324,8 +324,16 @@ function triggerAutoMatchAndFitting() {
     if (saved) closetItems = JSON.parse(saved);
 
     if (closetItems.length === 0) {
-        alert('ยังไม่มีรายการเสื้อผ้าในตู้ กรุณาอัปโหลดรูปเสื้อผ้าก่อนสุ่มจับคู่นะครับ');
+        showLongLookToast('ยังไม่มีรายการเสื้อผ้าในตู้ กรุณาอัปโหลดรูปเสื้อผ้าก่อนสุ่มจับคู่นะครับ', 'info');
         return;
+    }
+
+    // แอนิเมชันลูกเต๋าหมุนที่ปุ่มสุ่ม
+    const diceIcon = document.getElementById('matcher-dice-icon');
+    if (diceIcon) {
+        diceIcon.classList.remove('animate-dice');
+        void diceIcon.offsetWidth;
+        diceIcon.classList.add('animate-dice');
     }
 
     const tops = closetItems.filter(isTopClothing);
@@ -344,13 +352,13 @@ function triggerAutoMatchAndFitting() {
 
     if (topLayer && bottomLayer) {
         topLayer.innerHTML = `
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center animate-pop-in">
                 <img src="${chosenTop.image}" class="h-28 w-28 object-contain drop-shadow transition-transform hover:scale-105" title="${chosenTop.name}">
                 <span class="text-[9px] bg-white/90 text-[#3D2B1F] px-2 py-0.5 rounded-full shadow-sm mt-1 max-w-[120px] truncate font-medium">${chosenTop.name}</span>
             </div>
         `;
         bottomLayer.innerHTML = `
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center animate-pop-in" style="animation-delay: 0.08s;">
                 <img src="${chosenBottom.image}" class="h-28 w-28 object-contain drop-shadow transition-transform hover:scale-105" title="${chosenBottom.name}">
                 <span class="text-[9px] bg-white/90 text-[#3D2B1F] px-2 py-0.5 rounded-full shadow-sm mt-1 max-w-[120px] truncate font-medium">${chosenBottom.name}</span>
             </div>
@@ -378,7 +386,7 @@ function populateSelectOptions() {
     }
 }
 
-// พรีวิวเสื้อผ้าบนหุ่นจำลองหน้า Builder
+// พรีวิวเสื้อผ้าบนหุ่นจำลองหน้า Builder พร้อมแอนิเมชัน Pop-in
 function previewClothesOnModel() {
     const topVal = document.getElementById('builder-top-select')?.value;
     const bottomVal = document.getElementById('builder-bottom-select')?.value;
@@ -386,8 +394,12 @@ function previewClothesOnModel() {
     const modelTop = document.getElementById('builder-model-top');
     const modelBottom = document.getElementById('builder-model-bottom');
 
-    if (modelTop && topVal) modelTop.innerHTML = `<img src="${topVal}" class="h-20 w-20 object-contain rounded-lg">`;
-    if (modelBottom && bottomVal) modelBottom.innerHTML = `<img src="${bottomVal}" class="h-20 w-20 object-contain rounded-lg">`;
+    if (modelTop && topVal) {
+        modelTop.innerHTML = `<img src="${topVal}" class="h-20 w-20 object-contain rounded-lg animate-pop-in">`;
+    }
+    if (modelBottom && bottomVal) {
+        modelBottom.innerHTML = `<img src="${bottomVal}" class="h-20 w-20 object-contain rounded-lg animate-pop-in" style="animation-delay: 0.05s;">`;
+    }
 }
 
 async function loadClothesFromDatabase() {

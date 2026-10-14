@@ -4,10 +4,13 @@ function switchPage(pageId) {
         page.classList.add('hidden');
     });
 
-    // 2. แสดงเฉพาะหน้าที่เลือก
+    // 2. แสดงเฉพาะหน้าที่เลือกพร้อมเอฟเฟกต์ Fade-in นุ่มนวล
     const selectedPage = document.getElementById(`page-${pageId}`);
     if (selectedPage) {
         selectedPage.classList.remove('hidden');
+        selectedPage.classList.remove('animate-page-enter');
+        void selectedPage.offsetWidth; // Force reflow เพื่อให้แอนิเมชันเริ่มใหม่ทุกครั้งที่สลับหน้า
+        selectedPage.classList.add('animate-page-enter');
     }
 
     // 3. รีเซ็ตสไตล์ปุ่มเมนูทั้งหมดให้เป็นสีปกติ

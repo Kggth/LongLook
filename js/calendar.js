@@ -54,12 +54,12 @@ function renderFullCalendar() {
         const dayItems = calendarOutfits[dateKey] || [];
         const hasItems = dayItems.length > 0;
 
-        let borderClass = isToday ? 'border-2 border-[#3D2B1F] shadow-md ring-2 ring-[#3D2B1F]/20' : 'border border-[#D8C2B0]';
+        let borderClass = isToday ? 'border-2 border-[#3D2B1F] shadow-md ring-2 ring-[#3D2B1F]/20 pulse-today' : 'border border-[#D8C2B0]';
         let bgClass = isToday ? 'bg-white font-bold' : (hasItems ? 'bg-[#FAF1EC]' : 'bg-[#FCE8E8] hover:bg-white');
 
         html += `
             <div onclick="openDayModal('${dateKey}', ${day}, ${month}, ${year})"
-                 class="${bgClass} ${borderClass} rounded-2xl min-h-[75px] sm:min-h-[85px] p-1.5 flex flex-col justify-between items-center cursor-pointer transition transform hover:-translate-y-0.5 shadow-sm text-[#3D2B1F]">
+                 class="${bgClass} ${borderClass} rounded-2xl min-h-[75px] sm:min-h-[85px] p-1.5 flex flex-col justify-between items-center cursor-pointer hover-lift shadow-sm text-[#3D2B1F]">
                 <div class="flex justify-between items-center w-full px-1">
                     <span class="text-xs ${isToday ? 'bg-[#3D2B1F] text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px]' : 'font-semibold'}">
                         ${day}
