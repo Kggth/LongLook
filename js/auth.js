@@ -99,13 +99,48 @@ async function handleLogin(event) {
             const userDisplay = (data.user && data.user.displayName) ? data.user.displayName : username;
             loginSuccess(username, userDisplay);
             return;
-        } else {
-            alert(data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-            return;
         }
+
+        if (response.status === 404) {
+            let legacyUser = null;
+            try {
+                const legacyUsers = JSON.parse(localStorage.getItem('wardrobe_users') || '[]');
+                if (Array.isArray(legacyUsers)) {
+                    legacyUser = legacyUsers.find(user => user.username === username && user.password === password);
+                }
+            } catch (storageError) {
+                console.warn('Could not read legacy local accounts:', storageError);
+            }
+
+            if (legacyUser) {
+                const migrationResponse = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: legacyUser.username,
+                        displayName: legacyUser.displayName || legacyUser.username,
+                        password
+                    })
+                });
+                const migrationData = await migrationResponse.json();
+
+                if (migrationResponse.ok && migrationData.token) {
+                    localStorage.setItem('wardrobe_token', migrationData.token);
+                    if (typeof closeLoginModal === 'function') closeLoginModal();
+                    loginSuccess(legacyUser.username, legacyUser.displayName || legacyUser.username);
+                    return;
+                }
+
+                alert(migrationData.message || 'ไม่สามารถย้ายบัญชีเดิมเข้าสู่ระบบฐานข้อมูลได้');
+                return;
+            }
+        }
+
+        alert(data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     } catch (err) {
         console.error('Login API Error:', err);
-        alert(`⚠️ ไม่สามารถเชื่อมต่อ Backend (${getApiBaseUrl()}) ได้\nกรุณาตรวจสอบว่าเซิร์ฟเวอร์รันอยู่ที่พอร์ต 5000 (npm start) หรือไม่`);
+        alert(`ไม่สามารถเชื่อมต่อ Backend (${getApiBaseUrl()}) ได้
+กรุณาตรวจสอบว่าเซิร์ฟเวอร์ทำงานอยู่`);
     }
 }
 

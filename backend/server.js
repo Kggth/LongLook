@@ -208,7 +208,7 @@ app.post('/api/auth/login', async (req, res) => {
         );
 
         if (!userResult.rows || userResult.rows.length === 0) {
-            return res.status(400).json({ message: 'ไม่พบชื่อผู้ใช้นี้ในระบบ' });
+            return res.status(404).json({ message: 'ไม่พบชื่อผู้ใช้นี้ในระบบ' });
         }
 
         const user = userResult.rows[0];
