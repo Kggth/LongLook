@@ -458,7 +458,7 @@ async function saveTodayOutfitToCalendar() {
         return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = typeof window.getLocalTodayString === 'function' ? window.getLocalTodayString() : new Date().toLocaleDateString('en-CA');
     const title = document.getElementById('home-outfit-title')?.innerText || 'ลุคสบายๆ วันชิลล์';
     const style = document.getElementById('home-outfit-style')?.innerText || 'Casual';
     const first = closetItems[0];
@@ -506,7 +506,7 @@ async function saveCurrentMatchToCalendar() {
         return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = typeof window.getLocalTodayString === 'function' ? window.getLocalTodayString() : new Date().toLocaleDateString('en-CA');
     const items = [];
     if (window.currentMatchedOutfit?.top) items.push(window.currentMatchedOutfit.top);
     if (window.currentMatchedOutfit?.bottom) items.push(window.currentMatchedOutfit.bottom);
@@ -574,7 +574,7 @@ async function saveBuilderOutfitToCalendar() {
         return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = typeof window.getLocalTodayString === 'function' ? window.getLocalTodayString() : new Date().toLocaleDateString('en-CA');
     const title = [topText, bottomText].filter(t => t && !t.includes('--')).join(' + ') || 'ลุคที่สร้างเอง';
 
     const items = [];

@@ -214,15 +214,73 @@ async function saveDayModalOutfits() {
     closeDayModal();
 }
 
-// โหลดข้อมูลปฏิทินเริ่มต้น
-function initCalendar() {
+// ฟังก์ชันดึงวันที่ปัจจุบันตามเวลาท้องถิ่น (Local Time YYYY-MM-DD)
+function getLocalTodayString() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+window.getLocalTodayString = getLocalTodayString;
+
+// โหลดข้อมูลปฏิทินเริ่มต้น (ทั้งจาก LocalStorage และดึงซิงค์จาก Database)
+async function initCalendar() {
     const saved = localStorage.getItem('wardrobe_calendar');
     if (saved) {
         try { calendarOutfits = JSON.parse(saved); } catch (e) {}
     }
     renderFullCalendar();
+
+    // ดึงข้อมูลจากเซิร์ฟเวอร์มาแมปเข้าสู่ calendarOutfits
+    const token = localStorage.getItem('longlook_token');
+    if (token) {
+        try {
+            const res = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const logs = await res.json();
+                if (Array.isArray(logs)) {
+                    logs.forEach(log => {
+                        if (log.log_date) {
+                            if (!calendarOutfits[log.log_date]) {
+                                calendarOutfits[log.log_date] = [];
+                            }
+                            const existing = calendarOutfits[log.log_date];
+                            if (!existing.some(it => it.image === log.image)) {
+                                existing.push({
+                                    id: log.id,
+                                    name: log.title || 'ลุคบันทึกไว้',
+                                    image: log.image || '',
+                                    style: log.style || 'CASUAL'
+                                });
+                            }
+                        }
+                    });
+                    localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
+                    renderFullCalendar();
+                }
+            }
+        } catch (e) {
+            console.error('Fetch calendar logs error:', e);
+        }
+    }
+}
+
+// อัปเดตป้ายวันที่ในหน้าหลักให้ตรงกับวันปัจจุบันเสมอ
+function updateHomeDateBadge() {
+    const badge = document.getElementById('current-date-badge');
+    if (badge) {
+        const now = new Date();
+        const d = now.getDate();
+        const m = THAI_MONTHS[now.getMonth()];
+        const y = now.getFullYear() + 543;
+        badge.innerText = `${d} ${m} ${y}`;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
+    updateHomeDateBadge();
 });
