@@ -122,16 +122,33 @@ async function analyzeClothWithAI(file) {
                 const matchedStyle = Array.from(styleSelect.options).find(o => o.value.toUpperCase() === result.style.toUpperCase());
                 if (matchedStyle) styleSelect.value = matchedStyle.value;
             }
-            alert(`✨ Gemini AI วิเคราะห์สำเร็จ!\nหมวดหมู่: ${result.category}\nสี: ${result.color}\nสไตล์: ${result.style}`);
+            showAiResultModal(result.category, result.color, result.style);
         } else {
             if (nameInput) nameInput.value = "";
-            alert(data.message || 'ไม่สามารถวิเคราะห์รูปภาพด้วย AI ได้');
+            showLongLookToast(data.message || 'ไม่สามารถวิเคราะห์รูปภาพด้วย AI ได้', 'error');
         }
     } catch (error) {
         console.error('AI Error:', error);
         if (nameInput) nameInput.value = "";
+        showLongLookToast('เกิดข้อผิดพลาดในการเชื่อมต่อ AI', 'error');
     }
 }
+
+// ฟังก์ชันเปิด/ปิด Modal ผลวิเคราะห์ Gemini AI (สไตล์ LongLook)
+window.showAiResultModal = function(category, color, style) {
+    const catElem = document.getElementById('ai-result-category');
+    const colElem = document.getElementById('ai-result-color');
+    const styElem = document.getElementById('ai-result-style');
+    if (catElem) catElem.innerText = category || 'เสื้อ';
+    if (colElem) colElem.innerText = color || 'ไม่ระบุสี';
+    if (styElem) styElem.innerText = style || 'CASUAL';
+
+    document.getElementById('ai-result-modal')?.classList.remove('hidden');
+};
+
+window.closeAiResultModal = function() {
+    document.getElementById('ai-result-modal')?.classList.add('hidden');
+};
 
 // บันทึกเสื้อผ้าลง Database และ LocalStorage
 async function saveClothToDatabase() {
@@ -142,7 +159,7 @@ async function saveClothToDatabase() {
     let uploadedFile = null;
 
     if (!name) {
-        alert("กรุณากรอกชื่อเสื้อผ้า");
+        showLongLookToast("กรุณากรอกชื่อเสื้อผ้าก่อนบันทึก", "info");
         return;
     }
 
@@ -152,11 +169,11 @@ async function saveClothToDatabase() {
 
         // File Validation: เช็กประเภทไฟล์และขนาดไม่เกิน 5MB
         if (!uploadedFile.type.match(/^image\/(jpeg|png|jpg)$/)) {
-            alert("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ JPEG หรือ PNG เท่านั้น");
+            showLongLookToast("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ JPEG หรือ PNG เท่านั้น", "error");
             return;
         }
         if (uploadedFile.size > 5 * 1024 * 1024) {
-            alert("ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB");
+            showLongLookToast("ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB", "error");
             return;
         }
 
@@ -178,7 +195,7 @@ async function saveClothToDatabase() {
 
     const token = localStorage.getItem('longlook_token');
     if (!token) {
-        alert('กรุณาเข้าสู่ระบบก่อนบันทึกเสื้อผ้าลงฐานข้อมูล');
+        showLongLookToast('🔒 กรุณาเข้าสู่ระบบก่อนบันทึกเสื้อผ้า', 'info');
         if (typeof openLoginModal === 'function') openLoginModal();
         return;
     }
@@ -194,7 +211,7 @@ async function saveClothToDatabase() {
         });
         const data = await response.json();
         if (!response.ok) {
-            alert(data.message || 'บันทึกเสื้อผ้าไม่สำเร็จ');
+            showLongLookToast(data.message || 'บันทึกเสื้อผ้าไม่สำเร็จ', 'error');
             return;
         }
         closetItems.unshift(data.cloth || clothData);
@@ -212,7 +229,7 @@ async function saveClothToDatabase() {
 
     if (nameInput) nameInput.value = '';
     if (fileInput) fileInput.value = '';
-    alert("บันทึกเสื้อผ้าลง SQLite (และ Firebase ถ้าตั้งค่าแล้ว) เรียบร้อย");
+    showLongLookToast("👕 บันทึกเสื้อผ้าลงตู้เรียบร้อยแล้ว!", "success");
 }
 
 // แสดงรายการเสื้อผ้าในตู้

@@ -491,17 +491,53 @@
         </div>
     </div>
 
+    <!-- MODAL 5: ผลการวิเคราะห์จาก Gemini AI (Custom AI Result Modal) -->
+    <div id="ai-result-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#FCE8E8] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-[#D8C2B0] space-y-4 animate-modal-in text-center relative">
+            <button onclick="closeAiResultModal()" class="absolute top-4 right-4 text-gray-500 hover:text-black font-bold p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="w-14 h-14 bg-[#FAF1EC] text-[#89C2D9] rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-inner border border-[#D8C2B0]">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+
+            <div>
+                <span class="text-[10px] font-bold tracking-wider uppercase text-[#7A9A8B] bg-[#EBD9CB] px-3 py-1 rounded-full">Gemini AI Analysis</span>
+                <h3 class="text-base font-bold text-[#3D2B1F] mt-2">วิเคราะห์เสื้อผ้าสำเร็จ! ✨</h3>
+                <p class="text-xs text-[#6B5647] mt-1">ระบบ AI ได้ตรวจจับคุณลักษณะของเสื้อผ้าเรียบร้อยแล้ว</p>
+            </div>
+
+            <div class="bg-white/80 p-4 rounded-2xl border border-[#D8C2B0] text-left space-y-2 text-xs">
+                <div class="flex justify-between items-center py-1 border-b border-[#FAF1EC]">
+                    <span class="text-[#6B5647]"><i class="fa-solid fa-shirt text-[#D88AAB] mr-2"></i>หมวดหมู่:</span>
+                    <span id="ai-result-category" class="font-bold text-[#3D2B1F] bg-[#EBD9CB] px-2.5 py-0.5 rounded-lg">-</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-[#FAF1EC]">
+                    <span class="text-[#6B5647]"><i class="fa-solid fa-palette text-[#89C2D9] mr-2"></i>สี:</span>
+                    <span id="ai-result-color" class="font-bold text-[#3D2B1F] bg-[#EBD9CB] px-2.5 py-0.5 rounded-lg">-</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-[#6B5647]"><i class="fa-solid fa-tag text-[#E9B44C] mr-2"></i>สไตล์:</span>
+                    <span id="ai-result-style" class="font-bold text-[#3D2B1F] bg-[#EBD9CB] px-2.5 py-0.5 rounded-lg">-</span>
+                </div>
+            </div>
+
+            <button onclick="closeAiResultModal()" class="w-full bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-2.5 rounded-xl text-xs font-medium shadow-md transition-all duration-200 transform active:scale-95">
+                ตกลง / นำไปใช้งาน
+            </button>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION (UI แจ้งเตือนสวยงามเข้ากับธีม LongLook) -->
     <div id="longlook-toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#3D2B1F] text-[#FFF0F5] border border-[#D8C2B0] px-5 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none max-w-sm">
         <span id="longlook-toast-icon" class="text-xl shrink-0"><i class="fa-solid fa-circle-check text-[#7A9A8B]"></i></span>
         <div class="text-xs font-medium" id="longlook-toast-message">แจ้งเตือนสำเร็จ</div>
     </div>
 
-    <script src="js/config.js?v=2.0"></script>
-    <script src="js/navigation.js?v=2.0"></script>
-    <script src="js/auth.js?v=2.0"></script>
-    <script src="js/closet.js?v=2.0"></script>
-    <script src="js/calendar.js?v=2.0"></script>
+    <script src="js/config.js?v=2.1"></script>
+    <script src="js/navigation.js?v=2.1"></script>
+    <script src="js/auth.js?v=2.1"></script>
+    <script src="js/closet.js?v=2.1"></script>
+    <script src="js/calendar.js?v=2.1"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
