@@ -1,281 +1,617 @@
-// Helper แปลง URL ของรูปภาพให้โหลดได้ถูกต้องทั้งบน file:/// และ localhost
-function resolveImageUrl(url) {
-    if (!url) return 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300';
-    if (url.startsWith('/uploads')) {
-        return `${getApiBaseUrl()}${url}`;
-    }
-    return url;
-}
+let mediaStream = null;
+let closetItems = [];
+let toastTimer = null;
 
-// โหลดรายการเสื้อผ้าของผู้ใช้ปัจจุบันจาก Oracle Database ผ่าน Backend API
-async function loadUserClothesFromBackend() {
-    const token = localStorage.getItem('wardrobe_token');
-    if (!token) return;
-
-    try {
-        const response = await fetch(`${getApiBaseUrl()}/api/clothes`, {
-            headers: getAuthHeaders()
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            window.closetItems = (data || []).map(item => ({
-                id: item.id || item.item_id,
-                name: item.name,
-                category: item.category,
-                image: resolveImageUrl(item.image),
-                color: item.color || '',
-                brand: item.brand || '',
-                size: item.size || '',
-                style: item.style || ''
-            }));
-            closetItems = window.closetItems;
-            localStorage.setItem('wardrobe_items', JSON.stringify(closetItems));
-            renderCloset();
-            if (typeof populateBuilderOptions === 'function') {
-                populateBuilderOptions();
-            }
-        }
-    } catch (err) {
-        console.error('Failed to load clothes from backend:', err);
-    }
-}
-
-async function addNewItem() {
-    const token = localStorage.getItem('wardrobe_token');
-    if (!token) {
-        if (typeof showPopup === 'function') {
-            showPopup('🔒 กรุณาเข้าสู่ระบบก่อนเพิ่มเสื้อผ้า เพื่อบันทึกลง Oracle Database จริง', () => {
-                if (typeof switchPage === 'function') switchPage('login');
-            });
-        } else {
-            alert('🔒 กรุณาเข้าสู่ระบบก่อนเพิ่มเสื้อผ้า');
-        }
+// UI แจ้งเตือนแบบ Toast สไตล์ LongLook (ช็อกโกแลต & อบอุ่น)
+window.showLongLookToast = function(message, type = 'success') {
+    const toast = document.getElementById('longlook-toast');
+    const msgElem = document.getElementById('longlook-toast-message');
+    const iconElem = document.getElementById('longlook-toast-icon');
+    if (!toast || !msgElem) {
+        alert(message);
         return;
     }
 
-    const nameInput = document.getElementById('item-name') || document.getElementById('cloth-name');
-    const categoryInput = document.getElementById('item-category') || document.getElementById('cloth-category');
-    const fileInput = document.getElementById('item-image-file') || document.getElementById('cloth-image');
-
-    const name = nameInput ? nameInput.value.trim() : '';
-    const category = categoryInput ? categoryInput.value : 'เสื้อ';
-
-    if (!name) {
-        alert('กรุณากรอกชื่อไอเทม');
-        return;
-    }
-
-    // สร้าง FormData สำหรับส่งข้อมูลไปยัง Backend API (รองรับการอัปโหลดไฟล์รูปภาพจริง)
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('category', category);
-
-    if (fileInput && fileInput.files && fileInput.files[0]) {
-        formData.append('image', fileInput.files[0]);
+    msgElem.innerText = message;
+    if (type === 'success') {
+        iconElem.innerHTML = `<i class="fa-solid fa-circle-check text-[#7A9A8B]"></i>`;
+    } else if (type === 'error') {
+        iconElem.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400"></i>`;
     } else {
-        formData.append('imageUrl', 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300');
+        iconElem.innerHTML = `<i class="fa-solid fa-circle-info text-[#E9B44C]"></i>`;
     }
 
-    await saveItemToClosetApi(formData);
+    // แสดง Toast
+    toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+    }, 3200);
+};
+
+// เปิด Modal ถ่ายรูป/เพิ่มเสื้อผ้า
+function openCameraModal() {
+    document.getElementById('camera-modal')?.classList.remove('hidden');
 }
 
-async function saveItemToClosetApi(formData) {
-    const token = localStorage.getItem('wardrobe_token');
-    if (!token) {
-        if (typeof showPopup === 'function') {
-            showPopup('🔒 กรุณาเข้าสู่ระบบก่อนเพิ่มเสื้อผ้า เพื่อบันทึกลง Oracle Database จริง', () => {
-                if (typeof switchPage === 'function') switchPage('login');
-                if (typeof openLoginModal === 'function') openLoginModal();
-            });
-        } else {
-            alert('🔒 กรุณาเข้าสู่ระบบก่อนเพิ่มเสื้อผ้า');
+// ปิด Modal ถ่ายรูป/เพิ่มเสื้อผ้า
+function closeCameraModal() {
+    document.getElementById('camera-modal')?.classList.add('hidden');
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+    }
+    window.capturedPhotoData = null;
+}
+
+// ขออนุญาตเปิดใช้งานกล้อง Webcam
+async function startCameraPermission() {
+    try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoElem = document.getElementById('webcam-video');
+        if (videoElem) {
+            videoElem.srcObject = mediaStream;
+            videoElem.classList.remove('hidden');
         }
+        document.getElementById('camera-placeholder')?.classList.add('hidden');
+    } catch (err) {
+        alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้งานกล้องในเบราว์เซอร์");
+    }
+}
+
+// ถ่ายรูปจากกล้อง
+function takeCameraPhoto() {
+    const videoElem = document.getElementById('webcam-video');
+    if (!mediaStream) {
+        alert("กรุณากดเปิดกล้องก่อนถ่ายรูป");
         return;
     }
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElem.videoWidth || 300;
+    canvas.height = videoElem.videoHeight || 300;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+    
+    window.capturedPhotoData = canvas.toDataURL('image/png');
+    alert("ถ่ายรูปเสื้อผ้าเรียบร้อยแล้ว!");
+}
+
+// ฟังก์ชันแปลงไฟล์เป็น Base64
+function convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// 🤖 ฟังก์ชันส่งรูปภาพไปให้ Gemini AI สแกนวิเคราะห์เสื้อผ้าอัตโนมัติ
+async function analyzeClothWithAI(file) {
+    const token = localStorage.getItem('longlook_token');
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const nameInput = document.getElementById('cloth-name-input');
+    if (nameInput) nameInput.value = "🤖 Gemini AI กำลังวิเคราะห์เสื้อผ้า...";
 
     try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/clothes`, {
+        const response = await fetch(`${window.LONGLOOK_API}/api/ai/analyze-clothing`, {
             method: 'POST',
-            headers: getAuthHeaders(),
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             body: formData
         });
 
-        let data = {};
-        try {
-            data = await response.json();
-        } catch (_) {}
-
-        if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('wardrobe_token');
-            alert('🔒 เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
-            if (typeof switchPage === 'function') switchPage('login');
-            return;
-        }
-
-        if (response.ok && data.cloth) {
-            const savedItem = {
-                id: data.cloth.id,
-                name: data.cloth.name,
-                category: data.cloth.category,
-                image: resolveImageUrl(data.cloth.image),
-                color: data.cloth.color || '',
-                brand: data.cloth.brand || '',
-                size: data.cloth.size || '',
-                style: data.cloth.style || ''
-            };
-
-            closetItems.unshift(savedItem);
-            window.closetItems = closetItems;
-            localStorage.setItem('wardrobe_items', JSON.stringify(closetItems));
-
-            if (typeof closeModal === 'function') closeModal();
-            if (typeof closeAddClothModal === 'function') closeAddClothModal();
-
-            const nameInput = document.getElementById('item-name') || document.getElementById('cloth-name');
-            if (nameInput) nameInput.value = '';
-
-            const fileInput = document.getElementById('item-image-file') || document.getElementById('cloth-image');
-            if (fileInput) fileInput.value = '';
-
-            renderCloset();
-            if (typeof populateBuilderOptions === 'function') populateBuilderOptions();
-
-            if (typeof showPopup === 'function') {
-                showPopup('🎉 บันทึกเสื้อผ้าลง Oracle Database สำเร็จ!');
-            } else {
-                alert('🎉 บันทึกเสื้อผ้าลง Oracle Database สำเร็จ!');
+        const data = await response.json();
+        if (response.ok && data.result) {
+            const result = data.result;
+            if (nameInput) {
+                nameInput.value = `${result.category || 'เสื้อ'} (${result.color || 'ไม่ระบุสี'})`;
             }
+            const catSelect = document.getElementById('cloth-category-input');
+            const styleSelect = document.getElementById('cloth-style-input');
+            if (catSelect && result.category) {
+                if (result.category.includes('กางเกง') || result.category.includes('กระโปรง')) catSelect.value = 'กางเกง';
+                else if (result.category.includes('เดรส')) catSelect.value = 'เดรส';
+                else catSelect.value = 'เสื้อ';
+            }
+            if (styleSelect && result.style) {
+                const matchedStyle = Array.from(styleSelect.options).find(o => o.value.toUpperCase() === result.style.toUpperCase());
+                if (matchedStyle) styleSelect.value = matchedStyle.value;
+            }
+            alert(`✨ Gemini AI วิเคราะห์สำเร็จ!\nหมวดหมู่: ${result.category}\nสี: ${result.color}\nสไตล์: ${result.style}`);
         } else {
-            alert(data.message || `เกิดข้อผิดพลาดในการบันทึกเสื้อผ้า (HTTP ${response.status})`);
+            if (nameInput) nameInput.value = "";
+            alert(data.message || 'ไม่สามารถวิเคราะห์รูปภาพด้วย AI ได้');
         }
-    } catch (err) {
-        console.error('Error saving item to API:', err);
-        alert(`⚠️ ไม่สามารถเชื่อมต่อกับ Backend (${getApiBaseUrl()}) ได้: ` + err.message + '\nโปรดตรวจสอบว่าเปิดคำสั่ง npm start ในโฟลเดอร์ backend อยู่หรือไม่');
+    } catch (error) {
+        console.error('AI Error:', error);
+        if (nameInput) nameInput.value = "";
     }
 }
 
-// ฟังก์ชันดั้งเดิมสำหรับรองรับ Fallback
-async function saveItemToCloset(name, category, image, style) {
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('category', category);
-    if (image instanceof File || image instanceof Blob) {
-        formData.append('image', image);
-    } else if (typeof image === 'string' && image.startsWith('http')) {
-        formData.append('imageUrl', image);
-    } else if (typeof image === 'string') {
-        formData.append('image', image);
-    }
-    if (style) formData.append('style', style);
-    await saveItemToClosetApi(formData);
-}
+// บันทึกเสื้อผ้าลง Database และ LocalStorage
+async function saveClothToDatabase() {
+    const nameInput = document.getElementById('cloth-name-input');
+    const fileInput = document.getElementById('file-upload-input');
+    const name = nameInput ? nameInput.value.trim() : '';
+    let imageUrl = window.capturedPhotoData || '';
+    let uploadedFile = null;
 
-async function deleteItem(id) {
-    if (!confirm('คุณต้องการลบเสื้อผ้านี้ออกจากตู้ใช่หรือไม่?')) {
+    if (!name) {
+        alert("กรุณากรอกชื่อเสื้อผ้า");
         return;
     }
 
-    const token = localStorage.getItem('wardrobe_token');
+    // ตรวจสอบไฟล์อัปโหลด
+    if (!imageUrl && fileInput && fileInput.files.length > 0) {
+        uploadedFile = fileInput.files[0];
+
+        // File Validation: เช็กประเภทไฟล์และขนาดไม่เกิน 5MB
+        if (!uploadedFile.type.match(/^image\/(jpeg|png|jpg)$/)) {
+            alert("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ JPEG หรือ PNG เท่านั้น");
+            return;
+        }
+        if (uploadedFile.size > 5 * 1024 * 1024) {
+            alert("ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB");
+            return;
+        }
+
+        imageUrl = await convertFileToBase64(uploadedFile);
+    }
+
+    const categoryInput = document.getElementById('cloth-category-input');
+    const styleInput = document.getElementById('cloth-style-input');
+    const category = categoryInput ? categoryInput.value : 'เสื้อ';
+    const style = styleInput ? styleInput.value : 'CASUAL';
+
+    const clothData = {
+        id: Date.now(),
+        name: name,
+        category: category,
+        style: style,
+        image: imageUrl || "https://via.placeholder.com/150"
+    };
+
+    const token = localStorage.getItem('longlook_token');
+    if (!token) {
+        alert('กรุณาเข้าสู่ระบบก่อนบันทึกเสื้อผ้าลงฐานข้อมูล');
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/clothes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(clothData)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || 'บันทึกเสื้อผ้าไม่สำเร็จ');
+            return;
+        }
+        closetItems.unshift(data.cloth || clothData);
+    } catch (e) {
+        console.error("Backend Save Error:", e);
+        closetItems.push(clothData);
+    }
+
+    localStorage.setItem('wardrobe_clothes', JSON.stringify(closetItems));
+
+    closeCameraModal();
+    renderClosetItems();
+    populateSelectOptions();
+    if (typeof loadCalendarHistory === 'function') loadCalendarHistory();
+
+    if (nameInput) nameInput.value = '';
+    if (fileInput) fileInput.value = '';
+    alert("บันทึกเสื้อผ้าลง SQLite (และ Firebase ถ้าตั้งค่าแล้ว) เรียบร้อย");
+}
+
+// แสดงรายการเสื้อผ้าในตู้
+function renderClosetItems() {
+    const closetGrid = document.getElementById('closet-grid');
+    if (!closetGrid) return;
+
+    const saved = localStorage.getItem('wardrobe_clothes');
+    if (saved) closetItems = JSON.parse(saved);
+
+    if (closetItems.length === 0) {
+        closetGrid.innerHTML = `<p class="text-xs text-[#6B5647] col-span-full text-center py-6">ยังไม่มีเสื้อผ้าในตู้ กดปุ่ม "+ เพิ่มเสื้อผ้าใหม่" ได้เลย</p>`;
+        return;
+    }
+
+    closetGrid.innerHTML = closetItems.map(item => `
+        <div class="bg-[#FCE8E8] p-3 rounded-2xl border border-[#D8C2B0] text-center shadow-sm hover:scale-[1.02] transition-transform flex flex-col items-center relative group">
+            <button type="button" onclick="deleteClothItem(event, '${item.id || ''}')" title="ลบเสื้อผ้าชิ้นนี้" 
+                    class="absolute top-2 right-2 w-7 h-7 bg-white/90 hover:bg-red-500 hover:text-white text-gray-500 rounded-full border border-[#D8C2B0] flex items-center justify-center text-xs shadow-md transition z-10 cursor-pointer">
+                <i class="fa-solid fa-trash-can pointer-events-none"></i>
+            </button>
+            <div class="w-full h-40 bg-white rounded-xl mb-2 border border-[#D8C2B0] flex items-center justify-center p-2 overflow-hidden">
+                <img src="${item.image}" class="max-w-full max-h-full object-contain" alt="${item.name}">
+            </div>
+            <h4 class="font-bold text-xs text-[#3D2B1F] truncate w-full" title="${item.name}">${item.name}</h4>
+            <span class="text-[9px] text-[#6B5647] bg-[#EBD9CB] px-2 py-0.5 rounded-md mt-1 font-medium">${item.category || 'เสื้อผ้า'}</span>
+        </div>
+    `).join('');
+}
+
+let itemPendingDeleteId = null;
+
+// ฟังก์ชันเปิด Modal ยืนยันการลบแบบสวยงามเข้ากับธีม LongLook
+window.deleteClothItem = function(event, clothId) {
+    if (event) {
+        if (event.preventDefault) event.preventDefault();
+        if (event.stopPropagation) event.stopPropagation();
+    }
+    
+    itemPendingDeleteId = clothId;
+    const item = closetItems.find(i => String(i.id) === String(clothId));
+    const nameElem = document.getElementById('delete-modal-cloth-name');
+    if (nameElem) {
+        nameElem.innerText = item ? `คุณแน่ใจหรือไม่ว่าต้องการลบ "${item.name}" ออกจากตู้เสื้อผ้า?` : 'คุณแน่ใจหรือไม่ว่าต้องการลบเสื้อผ้าชิ้นนี้ออกจากตู้เสื้อผ้าของคุณ?';
+    }
+
+    document.getElementById('delete-confirm-modal')?.classList.remove('hidden');
+};
+
+window.closeDeleteConfirmModal = function() {
+    itemPendingDeleteId = null;
+    document.getElementById('delete-confirm-modal')?.classList.add('hidden');
+};
+
+// ดำเนินการลบจริงเมื่อกดยืนยันใน Custom Modal
+window.executeDeleteClothItem = async function() {
+    const clothId = itemPendingDeleteId;
+    if (!clothId) {
+        closeDeleteConfirmModal();
+        return;
+    }
+
+    const token = localStorage.getItem('longlook_token');
     if (token) {
         try {
-            const response = await fetch(`${getApiBaseUrl()}/api/clothes/${id}`, {
+            await fetch(`${window.LONGLOOK_API}/api/clothes/${clothId}`, {
                 method: 'DELETE',
-                headers: getAuthHeaders()
+                headers: { Authorization: `Bearer ${token}` }
             });
-
-            if (!response.ok) {
-                const data = await response.json();
-                alert(data.message || 'ไม่สามารถลบเสื้อผ้าได้');
-                return;
-            }
-        } catch (err) {
-            console.error('Delete item API error:', err);
-            alert('⚠️ ไม่สามารถติดต่อ Backend เพื่อลบข้อมูลในฐานข้อมูลได้');
-            return;
+        } catch (e) {
+            console.error('Delete backend error:', e);
         }
     }
 
-    closetItems = closetItems.filter(item => item.id !== id);
-    window.closetItems = closetItems;
-    localStorage.setItem('wardrobe_items', JSON.stringify(closetItems));
+    // ลบออกจาก memory และ local storage ทันที
+    closetItems = closetItems.filter(item => String(item.id) !== String(clothId));
+    localStorage.setItem('wardrobe_clothes', JSON.stringify(closetItems));
 
-    renderCloset();
-    if (typeof populateBuilderOptions === 'function') populateBuilderOptions();
+    // ปิด Modal
+    closeDeleteConfirmModal();
 
-    if (typeof showPopup === 'function') {
-        showPopup('🗑️ ลบไอเทมออกจาก Oracle Database เรียบร้อยแล้ว');
-    } else {
-        alert('🗑️ ลบไอเทมเรียบร้อยแล้ว');
+    // อัปเดตหน้าจอทันที
+    renderClosetItems();
+    populateSelectOptions();
+    if (typeof loadCalendarHistory === 'function') loadCalendarHistory();
+    if (typeof renderFullCalendar === 'function') renderFullCalendar();
+};
+
+// ฟังก์ชันช่วยแยกประเภทเสื้อผ้า (ท่อนบน vs ท่อนล่าง)
+function isBottomClothing(item) {
+    const cat = (item.category || '').toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    return cat === 'กางเกง' || cat === 'กระโปรง' || cat.includes('กางเกง') || cat.includes('กระโปรง') || cat.includes('bottom') || cat.includes('pants') ||
+           name.includes('เกง') || name.includes('กระโปรง') || name.includes('ยีน') || name.includes('jean') || name.includes('skirt') || name.includes('short');
+}
+
+function isTopClothing(item) {
+    if (isBottomClothing(item)) return false; // ถ้าเป็นท่อนล่าง ต้องไม่ใช่เสื้อเด็ดขาด
+    const cat = (item.category || '').toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    return cat === 'เสื้อ' || cat.includes('เสื้อ') || cat.includes('top') || cat.includes('แจ็คเก็ต') || 
+           name.includes('เสื้อ') || name.includes('shirt') || name.includes('hoodie') || name.includes('jacket') ||
+           (!isBottomClothing(item) && cat !== 'เดรส');
+}
+
+// สุ่มแมตช์ชุดใส่บนหุ่นจำลอง
+function triggerAutoMatchAndFitting() {
+    const saved = localStorage.getItem('wardrobe_clothes');
+    if (saved) closetItems = JSON.parse(saved);
+
+    if (closetItems.length === 0) {
+        alert('ยังไม่มีรายการเสื้อผ้าในตู้ กรุณาอัปโหลดรูปเสื้อผ้าก่อนสุ่มจับคู่นะครับ');
+        return;
+    }
+
+    const tops = closetItems.filter(isTopClothing);
+    const bottoms = closetItems.filter(isBottomClothing);
+
+    const chosenTop = tops.length > 0 ? tops[Math.floor(Math.random() * tops.length)] : closetItems[0];
+    const chosenBottom = bottoms.length > 0 ? bottoms[Math.floor(Math.random() * bottoms.length)] : (closetItems[1] || closetItems[0]);
+
+    window.currentMatchedOutfit = {
+        top: chosenTop,
+        bottom: chosenBottom
+    };
+
+    const topLayer = document.getElementById('avatar-top-layer');
+    const bottomLayer = document.getElementById('avatar-bottom-layer');
+
+    if (topLayer && bottomLayer) {
+        topLayer.innerHTML = `
+            <div class="flex flex-col items-center">
+                <img src="${chosenTop.image}" class="h-28 w-28 object-contain drop-shadow transition-transform hover:scale-105" title="${chosenTop.name}">
+                <span class="text-[9px] bg-white/90 text-[#3D2B1F] px-2 py-0.5 rounded-full shadow-sm mt-1 max-w-[120px] truncate font-medium">${chosenTop.name}</span>
+            </div>
+        `;
+        bottomLayer.innerHTML = `
+            <div class="flex flex-col items-center">
+                <img src="${chosenBottom.image}" class="h-28 w-28 object-contain drop-shadow transition-transform hover:scale-105" title="${chosenBottom.name}">
+                <span class="text-[9px] bg-white/90 text-[#3D2B1F] px-2 py-0.5 rounded-full shadow-sm mt-1 max-w-[120px] truncate font-medium">${chosenBottom.name}</span>
+            </div>
+        `;
     }
 }
 
-function renderCloset() {
-    const fullGrid = document.getElementById('full-closet-grid') || document.getElementById('closet-grid');
-    const homePreview = document.getElementById('home-closet-preview');
+// เติมตัวเลือกเสื้อผ้าลงใน Select สำหรับ Builder
+function populateSelectOptions() {
+    const saved = localStorage.getItem('wardrobe_clothes');
+    if (saved) closetItems = JSON.parse(saved);
 
-    const catFilter = document.getElementById('filter-category')?.value || 'ALL';
-    const keyword = document.getElementById('search-keyword')?.value?.trim().toLowerCase() || '';
+    const topSelect = document.getElementById('builder-top-select');
+    const bottomSelect = document.getElementById('builder-bottom-select');
 
-    let itemsToRender = closetItems || [];
-    if (catFilter !== 'ALL') {
-        itemsToRender = itemsToRender.filter(i => i.category === catFilter);
+    if (topSelect && bottomSelect) {
+        const tops = closetItems.filter(isTopClothing);
+        const bottoms = closetItems.filter(isBottomClothing);
+
+        topSelect.innerHTML = `<option value="">-- เลือกเสื้อท่อนบน --</option>` +
+            tops.map(item => `<option value="${item.image}">${item.name}</option>`).join('');
+
+        bottomSelect.innerHTML = `<option value="">-- เลือกกางเกง/กระโปรงท่อนล่าง --</option>` +
+            bottoms.map(item => `<option value="${item.image}">${item.name}</option>`).join('');
     }
-    if (keyword) {
-        itemsToRender = itemsToRender.filter(i => i.name.toLowerCase().includes(keyword));
+}
+
+// พรีวิวเสื้อผ้าบนหุ่นจำลองหน้า Builder
+function previewClothesOnModel() {
+    const topVal = document.getElementById('builder-top-select')?.value;
+    const bottomVal = document.getElementById('builder-bottom-select')?.value;
+
+    const modelTop = document.getElementById('builder-model-top');
+    const modelBottom = document.getElementById('builder-model-bottom');
+
+    if (modelTop && topVal) modelTop.innerHTML = `<img src="${topVal}" class="h-20 w-20 object-contain rounded-lg">`;
+    if (modelBottom && bottomVal) modelBottom.innerHTML = `<img src="${bottomVal}" class="h-20 w-20 object-contain rounded-lg">`;
+}
+
+async function loadClothesFromDatabase() {
+    const token = localStorage.getItem('longlook_token');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/clothes`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+        const rows = await response.json();
+        if (Array.isArray(rows)) {
+            closetItems = rows;
+            localStorage.setItem('wardrobe_clothes', JSON.stringify(closetItems));
+            renderClosetItems();
+            populateSelectOptions();
+        }
+    } catch (err) {
+        console.error('Load clothes error:', err);
     }
+}
 
-    let htmlContent = '';
+async function loadCalendarHistory() {
+    const token = localStorage.getItem('longlook_token');
+    const container = document.getElementById('calendar-history-container');
+    const statClothes = document.getElementById('stat-total-clothes');
+    const statOutfits = document.getElementById('stat-total-outfits');
+    if (statClothes) statClothes.innerText = String(closetItems.length);
 
-    if (itemsToRender.length === 0) {
-        htmlContent = `
-            <p class="text-xs text-gray-400 col-span-full text-center py-6">
-                ยังไม่มีเสื้อผ้าในหมวดนี้ หรือไม่พบไอเทมที่ค้นหา
-            </p>
-        `;
-    } else {
-        itemsToRender.forEach(item => {
-            htmlContent += `
-                <div class="bg-white p-4 rounded-2xl border border-[#EAE6DF] text-center relative group shadow-sm transition hover:shadow-md">
-                    <button
-                        onclick="deleteItem(${item.id})"
-                        class="absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-500 w-7 h-7 rounded-full text-xs flex items-center justify-center transition"
-                        title="ลบไอเทมนี้"
-                    >
-                        ✕
-                    </button>
+    if (!token || !container) return;
 
-                    <div class="h-36 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
-                        <img
-                            src="${resolveImageUrl(item.image)}"
-                            class="h-full w-full object-contain"
-                            alt="${item.name}"
-                        >
-                    </div>
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+        const rows = await response.json();
+        if (statOutfits) statOutfits.innerText = String(rows.length);
 
-                    <h4 class="font-bold text-sm mt-2 text-gray-800 truncate">
-                        ${item.name}
-                    </h4>
+        if (!rows.length) {
+            container.innerHTML = `<p class="text-xs text-[#6B5647] col-span-full py-6 text-center">ยังไม่มีประวัติการบันทึกชุด</p>`;
+            return;
+        }
 
-                    <span class="inline-block bg-[#F3ECE4] text-[#8C6D53] text-[10px] px-2 py-0.5 rounded-md font-semibold mt-1">
-                        ${item.category}
-                    </span>
+        container.innerHTML = rows.map((log) => `
+            <div class="bg-[#FCE8E8] p-4 rounded-2xl border border-[#D8C2B0] shadow-sm flex items-center gap-4 hover:scale-[1.02] transition">
+                <div class="w-16 h-16 bg-white rounded-xl border border-[#D8C2B0] flex items-center justify-center p-1 overflow-hidden shrink-0">
+                    ${log.image ? `<img src="${log.image}" class="max-w-full max-h-full object-contain">` : `<i class="fa-solid fa-shirt text-gray-400 text-xl"></i>`}
                 </div>
-            `;
+                <div class="flex-grow">
+                    <span class="text-[10px] font-semibold bg-[#EBD9CB] text-[#3D2B1F] px-2 py-0.5 rounded-md">${log.log_date || ''}</span>
+                    <h4 class="font-bold text-sm text-[#3D2B1F] mt-1.5">${log.title || 'ลุควันนี้'}</h4>
+                    <p class="text-[10px] text-[#6B5647] mt-0.5"><i class="fa-solid fa-tag text-[#D88AAB] mr-1"></i>สไตล์: ${log.style || 'Casual'}</p>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error('Load calendar error:', err);
+    }
+}
+
+async function saveTodayOutfitToCalendar() {
+    const token = localStorage.getItem('longlook_token');
+    if (!token) {
+        alert('กรุณาเข้าสู่ระบบก่อนบันทึกลุค');
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const title = document.getElementById('home-outfit-title')?.innerText || 'ลุคสบายๆ วันชิลล์';
+    const style = document.getElementById('home-outfit-style')?.innerText || 'Casual';
+    const first = closetItems[0];
+
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                style: style,
+                image: first?.image || '',
+                log_date: today
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || 'บันทึกปฏิทินไม่สำเร็จ');
+            return;
+        }
+        await loadCalendarHistory();
+        showLongLookToast('📌 บันทึกลุควันนี้ลงปฏิทินเรียบร้อยแล้ว!', 'success');
+    } catch (err) {
+        console.error(err);
+        showLongLookToast('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ', 'error');
+    }
+}
+
+// บันทึกชุดที่สุ่มได้จากหน้า Matcher ลงปฏิทิน
+async function saveCurrentMatchToCalendar() {
+    const token = localStorage.getItem('longlook_token');
+    if (!token) {
+        showLongLookToast('🔒 กรุณาเข้าสู่ระบบก่อนบันทึกลุค', 'info');
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+
+    const topImg = document.querySelector('#avatar-top-layer img');
+    const bottomImg = document.querySelector('#avatar-bottom-layer img');
+    if (!topImg && !bottomImg) {
+        showLongLookToast('กรุณากดสุ่มชุดก่อนบันทึกนะครับ', 'info');
+        return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const items = [];
+    if (window.currentMatchedOutfit?.top) items.push(window.currentMatchedOutfit.top);
+    if (window.currentMatchedOutfit?.bottom) items.push(window.currentMatchedOutfit.bottom);
+
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: `${topName} + ${bottomName}`,
+                style: 'สุ่มแมตช์ชุด',
+                image: topImg?.src || bottomImg?.src || '',
+                log_date: today,
+                items: items
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            await loadCalendarHistory();
+            showLongLookToast('🎉 บันทึก Outfit และปฏิทินลง Database เรียบร้อยแล้ว!', 'success');
+        } else {
+            showLongLookToast(data.message || 'บันทึกไม่สำเร็จ', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showLongLookToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+}
+
+// บันทึกชุดจากหน้า Builder (สร้างลุคเอง) ลงปฏิทิน
+async function saveBuilderOutfitToCalendar() {
+    const token = localStorage.getItem('longlook_token');
+    if (!token) {
+        showLongLookToast('🔒 กรุณาเข้าสู่ระบบก่อนบันทึกลุค', 'info');
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+
+    const topSelect = document.getElementById('builder-top-select');
+    const bottomSelect = document.getElementById('builder-bottom-select');
+    const topText = topSelect?.options[topSelect.selectedIndex]?.text || '';
+    const bottomText = bottomSelect?.options[bottomSelect.selectedIndex]?.text || '';
+
+    if (!topSelect?.value && !bottomSelect?.value) {
+        showLongLookToast('กรุณาเลือกเสื้อหรือกางเกงก่อนบันทึกครับ', 'info');
+        return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const title = [topText, bottomText].filter(t => t && !t.includes('--')).join(' + ') || 'ลุคที่สร้างเอง';
+
+    const items = [];
+    if (topSelect?.value) {
+        const topItem = closetItems.find(i => i.image === topSelect.value);
+        if (topItem) items.push(topItem);
+    }
+    if (bottomSelect?.value) {
+        const bottomItem = closetItems.find(i => i.image === bottomSelect.value);
+        if (bottomItem) items.push(bottomItem);
+    }
+
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                style: 'Custom Builder',
+                image: topSelect?.value || bottomSelect?.value || '',
+                log_date: today,
+                items: items
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            await loadCalendarHistory();
+            showLongLookToast('💾 บันทึก Outfit ลงปฏิทินเรียบร้อยแล้ว!', 'success');
+        } else {
+            showLongLookToast(data.message || 'บันทึกไม่สำเร็จ', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showLongLookToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+}
+
+// Event Listener เมื่อเลือกไฟล์รูปภาพ ให้อ่านไฟล์และสแกนด้วย AI อัตโนมัติ
+document.addEventListener('DOMContentLoaded', () => {
+    renderClosetItems();
+    populateSelectOptions();
+    loadClothesFromDatabase();
+    loadCalendarHistory();
+
+    const fileInput = document.getElementById('file-upload-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                analyzeClothWithAI(e.target.files[0]);
+            }
         });
     }
-
-    if (fullGrid) {
-        fullGrid.innerHTML = htmlContent;
-    }
-
-    const closetGridAlt = document.getElementById('closet-grid');
-    if (closetGridAlt && closetGridAlt !== fullGrid) {
-        closetGridAlt.innerHTML = htmlContent;
-    }
-
-    if (homePreview) {
-        homePreview.innerHTML = htmlContent;
-    }
-}
+});

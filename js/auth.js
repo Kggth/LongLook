@@ -1,227 +1,132 @@
-function checkActiveSession() {
-    const savedUser = localStorage.getItem('wardrobe_current_user');
-    const displayName = localStorage.getItem('wardrobe_display_name');
-    const token = localStorage.getItem('wardrobe_token');
+function openLoginModal() {
+    document.getElementById('login-modal')?.classList.remove('hidden');
+}
 
-    if (savedUser && token) {
-        isLoggedIn = true;
-        updateUserUI(displayName || savedUser);
+function closeLoginModal() {
+    document.getElementById('login-modal')?.classList.add('hidden');
+}
+
+function toggleAuthTab(tab) {
+    const loginForm = document.getElementById('form-login');
+    const registerForm = document.getElementById('form-register');
+    const loginBtn = document.getElementById('tab-login-btn');
+    const registerBtn = document.getElementById('tab-register-btn');
+
+    const active = 'flex-1 py-2 text-xs font-bold text-[#3D2B1F] border-b-2 border-[#3D2B1F]';
+    const idle = 'flex-1 py-2 text-xs font-bold text-[#6B5647]';
+
+    if (tab === 'register') {
+        loginForm?.classList.add('hidden');
+        registerForm?.classList.remove('hidden');
+        if (loginBtn) loginBtn.className = idle;
+        if (registerBtn) registerBtn.className = active;
+    } else {
+        registerForm?.classList.add('hidden');
+        loginForm?.classList.remove('hidden');
+        if (registerBtn) registerBtn.className = idle;
+        if (loginBtn) loginBtn.className = active;
     }
 }
 
-async function handleRegister(event) {
-    event.preventDefault();
-
-    const username = document.getElementById('reg-user').value.trim();
-    const displayName = document.getElementById('reg-display-name').value.trim();
-    const password = document.getElementById('reg-pass').value;
-    const confirmPassword = document.getElementById('reg-pass-confirm').value;
-
-    if (!username || !displayName || !password) {
-        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        alert('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
-        return;
-    }
-
-    if (password.length < 8) {
-        alert('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
-        return;
-    }
-
-    try {
-        const apiUrl = `${getApiBaseUrl()}/api/auth/register`;
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, displayName, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.token) {
-            localStorage.setItem('wardrobe_token', data.token);
-
-            document.getElementById('reg-user').value = '';
-            document.getElementById('reg-display-name').value = '';
-            document.getElementById('reg-pass').value = '';
-            document.getElementById('reg-pass-confirm').value = '';
-
-            if (typeof showPopup === 'function') {
-                showPopup('🎉 สมัครสมาชิกและบันทึกลง Oracle สำเร็จ!', () => {
-                    loginSuccess(username, displayName);
-                });
-            } else {
-                alert('🎉 สมัครสมาชิกสำเร็จ!');
-                loginSuccess(username, displayName);
-            }
-            return;
-        } else {
-            alert(data.message || 'ไม่สามารถลงทะเบียนได้');
-            return;
-        }
-    } catch (err) {
-        console.error('Register API Error:', err);
-        alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend ได้ กรุณาตรวจสอบว่ารัน backend ไว้ที่พอร์ต 5000 หรือไม่');
+function applyLoggedInUser(user) {
+    const name = user?.username || 'ผู้เยี่ยมชม';
+    document.querySelectorAll('#user-name-label, .user-name, #user-name-display').forEach((el) => {
+        el.innerText = name;
+    });
+    const loginBtn = document.getElementById('btn-login-trigger');
+    if (loginBtn) {
+        loginBtn.innerText = 'ออกจากระบบ';
+        loginBtn.onclick = handleUserLogout;
     }
 }
 
-async function handleLogin(event) {
-    event.preventDefault();
-
-    const usernameInput = document.getElementById('login-user') || document.getElementById('login-username');
-    const passwordInput = document.getElementById('login-pass') || document.querySelector('#login-modal input[type="password"]');
-
-    const username = usernameInput ? usernameInput.value.trim() : '';
-    const password = passwordInput ? passwordInput.value : '';
-
-    if (!username || !password) {
-        alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
-        return;
+function applyLoggedOutUser() {
+    document.querySelectorAll('#user-name-label, .user-name, #user-name-display').forEach((el) => {
+        el.innerText = 'ผู้เยี่ยมชม';
+    });
+    const loginBtn = document.getElementById('btn-login-trigger');
+    if (loginBtn) {
+        loginBtn.innerText = 'เข้าสู่ระบบ / สมัครสมาชิก';
+        loginBtn.onclick = openLoginModal;
     }
+}
 
+function handleUserLogout() {
+    localStorage.removeItem('longlook_token');
+    localStorage.removeItem('longlook_user');
+    applyLoggedOutUser();
+}
+
+async function handleUserLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('login-username')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
     try {
-        const apiUrl = `${getApiBaseUrl()}/api/auth/login`;
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${window.LONGLOOK_API}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
-
         const data = await response.json();
-
-        if (response.ok && data.token) {
-            localStorage.setItem('wardrobe_token', data.token);
-            if (typeof closeLoginModal === 'function') closeLoginModal();
-            const userDisplay = (data.user && data.user.displayName) ? data.user.displayName : username;
-            loginSuccess(username, userDisplay);
+        if (!response.ok) {
+            alert(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
             return;
         }
-
-        if (response.status === 404) {
-            let legacyUser = null;
-            try {
-                const legacyUsers = JSON.parse(localStorage.getItem('wardrobe_users') || '[]');
-                if (Array.isArray(legacyUsers)) {
-                    legacyUser = legacyUsers.find(user => user.username === username && user.password === password);
-                }
-            } catch (storageError) {
-                console.warn('Could not read legacy local accounts:', storageError);
-            }
-
-            if (legacyUser) {
-                const migrationResponse = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: legacyUser.username,
-                        displayName: legacyUser.displayName || legacyUser.username,
-                        password
-                    })
-                });
-                const migrationData = await migrationResponse.json();
-
-                if (migrationResponse.ok && migrationData.token) {
-                    localStorage.setItem('wardrobe_token', migrationData.token);
-                    if (typeof closeLoginModal === 'function') closeLoginModal();
-                    loginSuccess(legacyUser.username, legacyUser.displayName || legacyUser.username);
-                    return;
-                }
-
-                alert(migrationData.message || 'ไม่สามารถย้ายบัญชีเดิมเข้าสู่ระบบฐานข้อมูลได้');
-                return;
-            }
-        }
-
-        alert(data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        localStorage.setItem('longlook_token', data.token);
+        localStorage.setItem('longlook_user', JSON.stringify(data.user));
+        applyLoggedInUser(data.user);
+        closeLoginModal();
+        if (typeof loadClothesFromDatabase === 'function') loadClothesFromDatabase();
+        if (typeof loadCalendarHistory === 'function') loadCalendarHistory();
+        alert(data.message);
     } catch (err) {
-        console.error('Login API Error:', err);
-        alert(`ไม่สามารถเชื่อมต่อ Backend (${getApiBaseUrl()}) ได้
-กรุณาตรวจสอบว่าเซิร์ฟเวอร์ทำงานอยู่`);
+        console.error(err);
+        alert('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณารัน backend ที่พอร์ต 5000');
     }
 }
 
-function loginSuccess(username, displayName) {
-    isLoggedIn = true;
-
-    localStorage.setItem('wardrobe_current_user', username);
-    localStorage.setItem('wardrobe_display_name', displayName);
-
-    showPopup(`💜 ยินดีต้อนรับคุณ ${displayName}`, () => {
-        updateUserUI(displayName);
-        switchPage('home');
-
-        // โหลดข้อมูลเสื้อผ้าและปฏิทินของผู้ใช้นี้จาก Oracle Database
-        if (typeof loadUserClothesFromBackend === 'function') {
-            loadUserClothesFromBackend();
-        }
-        if (typeof loadCalendarFromBackend === 'function') {
-            loadCalendarFromBackend();
-        }
-    });
-}
-
-function updateUserUI(displayName) {
-    const avatar = document.getElementById('user-avatar-icon');
-    if (avatar) {
-        avatar.className = 'w-7 h-7 bg-[#E89387] text-white rounded-full flex items-center justify-center text-xs font-bold';
-        avatar.innerText = displayName.charAt(0).toUpperCase();
-    }
-
-    const nameLabel = document.getElementById('user-name-label');
-    if (nameLabel) nameLabel.innerText = displayName;
-
-    const loginBtn = document.getElementById('btn-login-trigger');
-    if (loginBtn) {
-        loginBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ';
-        loginBtn.className = 'bg-rose-500 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm';
-        loginBtn.onclick = handleLogout;
-    }
-
-    if (typeof initUserDropdownState === 'function') initUserDropdownState();
-}
-
-function handleLogout() {
-    isLoggedIn = false;
-
-    localStorage.removeItem('wardrobe_token');
-    localStorage.removeItem('wardrobe_current_user');
-    localStorage.removeItem('wardrobe_display_name');
-
-    // เคลียร์ตู้เสื้อผ้าและปฏิทินในหน่วยความจำ
-    window.closetItems = [];
-    closetItems = [];
-    window.calendarOutfits = {};
-    calendarOutfits = {};
-
-    renderCloset();
-    if (typeof initRealCalendar === 'function') initRealCalendar();
-
-    const avatar = document.getElementById('user-avatar-icon');
-    if (avatar) {
-        avatar.className = 'w-7 h-7 bg-[#F3ECE4] text-[#8C6D53] rounded-full flex items-center justify-center text-xs font-bold';
-        avatar.innerHTML = '<i class="fa-solid fa-user"></i>';
-    }
-
-    const nameLabel = document.getElementById('user-name-label');
-    if (nameLabel) nameLabel.innerText = 'ผู้เยี่ยมชม';
-
-    const loginBtn = document.getElementById('btn-login-trigger');
-    if (loginBtn) {
-        loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ';
-        loginBtn.className = 'bg-[#8C6D53] hover:bg-[#755a43] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm';
-        loginBtn.onclick = () => switchPage('login');
-    }
-
-    if (typeof showPopup === 'function') {
-        showPopup('👋 ออกจากระบบเรียบร้อย', () => {
-            switchPage('home');
+async function handleUserRegister(event) {
+    event.preventDefault();
+    const username = document.getElementById('reg-username')?.value.trim();
+    const password = document.getElementById('reg-password')?.value;
+    try {
+        const response = await fetch(`${window.LONGLOOK_API}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
-    } else {
-        alert('👋 ออกจากระบบเรียบร้อย');
-        switchPage('home');
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || 'สมัครสมาชิกไม่สำเร็จ');
+            return;
+        }
+        localStorage.setItem('longlook_token', data.token);
+        localStorage.setItem('longlook_user', JSON.stringify(data.user));
+        applyLoggedInUser(data.user);
+        closeLoginModal();
+        alert(data.message);
+    } catch (err) {
+        console.error(err);
+        alert('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณารัน backend ที่พอร์ต 5000');
     }
 }
+
+function checkActiveSession() {
+    const token = localStorage.getItem('longlook_token');
+    const rawUser = localStorage.getItem('longlook_user');
+    if (!token || !rawUser) {
+        applyLoggedOutUser();
+        return;
+    }
+    try {
+        applyLoggedInUser(JSON.parse(rawUser));
+        if (typeof loadClothesFromDatabase === 'function') loadClothesFromDatabase();
+        if (typeof loadCalendarHistory === 'function') loadCalendarHistory();
+    } catch {
+        handleUserLogout();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkActiveSession();
+});

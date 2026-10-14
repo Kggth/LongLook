@@ -1,460 +1,228 @@
-function initRealCalendar() {
-    const now = new Date();
+// ==========================================
+// LongLook Calendar System (Full Monthly View & Day Modal)
+// Theme: LongLook Warm Cream & Dark Chocolate
+// ==========================================
 
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const currentDate = now.getDate();
+let calendarViewDate = new Date();
+let selectedDateKey = null;
+let calendarOutfits = {};
 
-    const monthNames = [
-        'มกราคม',
-        'กุมภาพันธ์',
-        'มีนาคม',
-        'เมษายน',
-        'พฤษภาคม',
-        'มิถุนายน',
-        'กรกฎาคม',
-        'สิงหาคม',
-        'กันยายน',
-        'ตุลาคม',
-        'พฤศจิกายน',
-        'ธันวาคม'
-    ];
+const THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+];
 
-    document.getElementById('calendar-month-year').innerText =
-        `ปฏิทิน ${monthNames[currentMonth]}`;
-
-    document.getElementById('current-date-badge').innerText =
-        `${currentDate} ${monthNames[currentMonth]} ${currentYear + 543}`;
-
-    const calendarGrid =
-        document.getElementById('real-calendar-grid');
-
-    let calendarHtml = '';
-
-    let startOfWeek = new Date(now);
-
-    startOfWeek.setDate(
-        currentDate - now.getDay()
-    );
-
-    for (let i = 0; i < 7; i++) {
-
-        let loopDate = new Date(startOfWeek);
-
-        loopDate.setDate(
-            startOfWeek.getDate() + i
-        );
-
-        let dateNum = loopDate.getDate();
-
-        if (dateNum === currentDate) {
-            calendarHtml += `
-                <span class="bg-[#E89387] text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto font-bold shadow-sm">
-                    ${dateNum}
-                </span>
-            `;
-        } else {
-            calendarHtml += `
-                <span class="text-gray-600 flex items-center justify-center h-6">
-                    ${dateNum}
-                </span>
-            `;
-        }
+function changeCalendarMonth(offset) {
+    if (offset === 0) {
+        calendarViewDate = new Date();
+    } else {
+        calendarViewDate.setMonth(calendarViewDate.getMonth() + offset);
     }
-
-    calendarGrid.innerHTML = calendarHtml;
+    renderFullCalendar();
 }
 
+// เรนเดอร์ปฏิทินแบบเต็มเดือน
 function renderFullCalendar() {
-    const now = new Date();
+    const titleElem = document.getElementById('full-calendar-title');
+    const gridElem = document.getElementById('full-calendar-grid');
+    if (!gridElem) return;
 
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const currentDate = now.getDate();
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+    const today = new Date();
 
-    const monthNames = [
-        'มกราคม',
-        'กุมภาพันธ์',
-        'มีนาคม',
-        'เมษายน',
-        'พฤษภาคม',
-        'มิถุนายน',
-        'กรกฎาคม',
-        'สิงหาคม',
-        'กันยายน',
-        'ตุลาคม',
-        'พฤศจิกายน',
-        'ธันวาคม'
-    ];
+    if (titleElem) {
+        titleElem.innerText = `${THAI_MONTHS[month]} ${year + 543}`;
+    }
 
-    document.getElementById('full-calendar-title').innerText =
-        `${monthNames[currentMonth]} ${currentYear + 543}`;
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
 
-    const calendarGrid =
-        document.getElementById('full-calendar-grid');
+    let html = '';
 
-    let calendarHtml = '';
-
-    const firstDayIndex =
-        new Date(
-            currentYear,
-            currentMonth,
-            1
-        ).getDay();
-
-    const totalDays =
-        new Date(
-            currentYear,
-            currentMonth + 1,
-            0
-        ).getDate();
-
+    // ช่องว่างก่อนวันแรกของเดือน
     for (let i = 0; i < firstDayIndex; i++) {
-        calendarHtml += `<div></div>`;
+        html += `<div class="p-1"></div>`;
     }
 
     for (let day = 1; day <= totalDays; day++) {
+        const monthStr = String(month + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const dateKey = `${year}-${monthStr}-${dayStr}`;
 
-        let monthStr =
-            String(currentMonth + 1).padStart(2, '0');
+        const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === day);
+        const dayItems = calendarOutfits[dateKey] || [];
+        const hasItems = dayItems.length > 0;
 
-        let dayStr =
-            String(day).padStart(2, '0');
+        let borderClass = isToday ? 'border-2 border-[#3D2B1F] shadow-md ring-2 ring-[#3D2B1F]/20' : 'border border-[#D8C2B0]';
+        let bgClass = isToday ? 'bg-white font-bold' : (hasItems ? 'bg-[#FAF1EC]' : 'bg-[#FCE8E8] hover:bg-white');
 
-        let dateKey =
-            `${currentYear}-${monthStr}-${dayStr}`;
+        html += `
+            <div onclick="openDayModal('${dateKey}', ${day}, ${month}, ${year})"
+                 class="${bgClass} ${borderClass} rounded-2xl min-h-[75px] sm:min-h-[85px] p-1.5 flex flex-col justify-between items-center cursor-pointer transition transform hover:-translate-y-0.5 shadow-sm text-[#3D2B1F]">
+                <div class="flex justify-between items-center w-full px-1">
+                    <span class="text-xs ${isToday ? 'bg-[#3D2B1F] text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px]' : 'font-semibold'}">
+                        ${day}
+                    </span>
+                    ${hasItems ? `<span class="w-2 h-2 rounded-full bg-[#E89387]"></span>` : ''}
+                </div>
+                
+                <div class="w-full flex flex-col items-center justify-center my-0.5">
+                    ${hasItems && dayItems[0]?.image ? `
+                        <img src="${dayItems[0].image}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-lg drop-shadow-sm">
+                    ` : ''}
+                </div>
 
-        let hasOutfit =
-            calendarOutfits[dateKey] &&
-            calendarOutfits[dateKey].length > 0;
-
-        let isToday =
-            day === currentDate;
-
-        let bgClass =
-            "bg-[#FAF7F2] hover:bg-gray-100 text-gray-700 border border-[#EFECE6]";
-
-        let badgeText =
-            hasOutfit ? '✨ มีชุดแล้ว' : 'ว่าง';
-
-        if (isToday) {
-            bgClass =
-                "bg-[#F3ECE4] border-2 border-[#E89387] text-gray-800 font-bold";
-        }
-
-        calendarHtml += `
-            <div
-                onclick="openDayModal('${dateKey}', ${day})"
-                class="${bgClass} rounded-2xl h-20 flex flex-col items-center justify-center transition cursor-pointer p-1 relative"
-            >
-                <span class="text-sm font-semibold">
-                    ${day}
-                </span>
-
-                <span class="text-[9px] text-[#8C6D53] mt-1 truncate w-full px-1">
-                    ${hasOutfit
-                        ? '🧥 ' + calendarOutfits[dateKey].length + ' ชิ้น'
-                        : badgeText}
-                </span>
+                <div class="w-full text-center">
+                    <span class="text-[9px] truncate block w-full px-1 ${hasItems ? 'text-[#3D2B1F] font-bold' : 'text-[#6B5647]/60'}">
+                        ${hasItems ? `${dayItems.length} ไอเทม` : 'ว่าง'}
+                    </span>
+                </div>
             </div>
         `;
     }
 
-    calendarGrid.innerHTML = calendarHtml;
+    gridElem.innerHTML = html;
 }
 
-function openDayModal(dateKey, dayNum) {
-
-    if (!isLoggedIn) {
-        showPopup(
-            '🔒 กรุณาเข้าสู่ระบบก่อนจัดการปฏิทินชุด',
-            () => {
-                switchPage('login');
-            }
-        );
-        return;
-    }
-
+// เปิดหน้าต่าง Modal จัดการชุดประจำวัน
+function openDayModal(dateKey, day, month, year) {
     selectedDateKey = dateKey;
 
-    document.getElementById('modal-day-title').innerText =
-        `จัดการชุดวันที่ ${dayNum} สิงหาคม 2569`;
+    const modalTitle = document.getElementById('modal-day-title');
+    if (modalTitle) {
+        modalTitle.innerHTML = `<i class="fa-solid fa-calendar-day text-[#89C2D9] mr-1"></i> จัดการชุดวันที่ ${day} ${THAI_MONTHS[month]} ${year + 543}`;
+    }
 
     renderDayModalContent();
-
-    document.getElementById('day-modal')
-        .classList.remove('hidden');
+    document.getElementById('day-modal')?.classList.remove('hidden');
 }
 
 function closeDayModal() {
-    document.getElementById('day-modal')
-        .classList.add('hidden');
-
+    document.getElementById('day-modal')?.classList.add('hidden');
     renderFullCalendar();
 }
 
+// แสดงรายการชุดที่เลือก และเสื้อผ้าทั้งหมดในตู้
 function renderDayModalContent() {
+    const outfitListContainer = document.getElementById('modal-outfit-list');
+    const closetSelector = document.getElementById('modal-closet-selector');
+    if (!outfitListContainer || !closetSelector) return;
 
-    const outfitListContainer =
-        document.getElementById('modal-outfit-list');
-
-    const closetSelector =
-        document.getElementById('modal-closet-selector');
-
-    let currentDayItems =
-        calendarOutfits[selectedDateKey] || [];
+    const currentDayItems = calendarOutfits[selectedDateKey] || [];
 
     if (currentDayItems.length === 0) {
-
         outfitListContainer.innerHTML = `
-            <p class="text-xs text-gray-400 italic">
-                ยังไม่มีการบันทึกชุดสำหรับวันนี้
-                เลือกไอเทมด้านล่างเพื่อเพิ่มได้เลย
+            <p class="text-xs text-[#6B5647] italic w-full text-center py-3">
+                ยังไม่มีการเลือกชุดสำหรับวันนี้ — คลิกเลือกไอเทมจากตู้ด้านล่างเพื่อเพิ่มได้เลย ✨
             </p>
         `;
-
     } else {
-
-        let html = '';
-
-        currentDayItems.forEach((item, index) => {
-
-            html += `
-                <div class="bg-white px-3 py-1.5 rounded-xl border border-[#EAE6DF] flex items-center gap-2 text-xs shadow-sm">
-
-                    <img
-                        src="${item.image}"
-                        class="w-6 h-6 object-contain rounded-md"
-                    >
-
-                    <span class="font-medium text-gray-800">
-                        ${item.name}
-                    </span>
-
-                    <button
-                        onclick="removeItemFromDate(${index})"
-                        class="text-red-400 hover:text-red-600 font-bold ml-1"
-                    >
-                        ✕
-                    </button>
-
-                </div>
-            `;
-        });
-
-        outfitListContainer.innerHTML = html;
+        outfitListContainer.innerHTML = currentDayItems.map((item, index) => `
+            <div class="bg-[#FCE8E8] px-3 py-1.5 rounded-xl border border-[#D8C2B0] flex items-center gap-2 text-xs shadow-sm">
+                <img src="${item.image}" class="w-7 h-7 object-contain rounded-lg bg-white p-0.5 border border-[#D8C2B0]">
+                <span class="font-bold text-[#3D2B1F] truncate max-w-[120px]">${item.name}</span>
+                <button onclick="removeItemFromDayDate(${index})" class="text-red-500 hover:text-red-700 font-bold ml-1 text-sm">✕</button>
+            </div>
+        `).join('');
     }
 
-    let closetHtml = '';
-
-    if (closetItems.length === 0) {
-
-        closetHtml = `
-            <p class="text-xs text-gray-400 col-span-full">
-                ตู้เสื้อผ้าว่างเปล่า
-            </p>
-        `;
-
-    } else {
-
-        closetItems.forEach(item => {
-
-            closetHtml += `
-                <div
-                    onclick="addItemToDate(${item.id})"
-                    class="bg-white hover:bg-[#FAF7F2] p-2 rounded-xl border border-[#EAE6DF] text-center cursor-pointer transition"
-                >
-
-                    <div class="w-12 h-12 mx-auto mb-1 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
-
-                        <img
-                            src="${item.image}"
-                            class="w-full h-full object-contain"
-                        >
-
-                    </div>
-
-                    <div class="text-[10px] font-medium text-gray-700 truncate">
-                        ${item.name}
-                    </div>
-
-                </div>
-            `;
-        });
+    const saved = localStorage.getItem('wardrobe_clothes');
+    let items = closetItems;
+    if (saved) {
+        try { items = JSON.parse(saved); } catch (e) {}
     }
 
-    closetSelector.innerHTML = closetHtml;
+    if (!items || items.length === 0) {
+        closetSelector.innerHTML = `<p class="text-xs text-[#6B5647] col-span-full py-4 text-center">ยังไม่มีเสื้อผ้าในตู้</p>`;
+    } else {
+        closetSelector.innerHTML = items.map(item => `
+            <div onclick="addItemToDayDate(${item.id})"
+                 class="bg-[#FCE8E8] hover:bg-white p-2 rounded-xl border border-[#D8C2B0] text-center cursor-pointer transition transform hover:scale-105 shadow-sm">
+                <div class="w-12 h-12 mx-auto mb-1 flex items-center justify-center bg-white rounded-lg p-1 border border-[#D8C2B0] overflow-hidden">
+                    <img src="${item.image}" class="max-w-full max-h-full object-contain">
+                </div>
+                <div class="text-[10px] font-bold text-[#3D2B1F] truncate">${item.name}</div>
+            </div>
+        `).join('');
+    }
 }
 
-function addItemToDate(itemId) {
+// เพิ่มไอเทมลงในวันที่กำลังเปิด
+function addItemToDayDate(itemId) {
+    const saved = localStorage.getItem('wardrobe_clothes');
+    let items = closetItems;
+    if (saved) {
+        try { items = JSON.parse(saved); } catch (e) {}
+    }
 
-    const item =
-        closetItems.find(i => i.id === itemId);
-
-    if (!item) return;
+    const item = items.find(i => String(i.id) === String(itemId));
+    if (!item || !selectedDateKey) return;
 
     if (!calendarOutfits[selectedDateKey]) {
         calendarOutfits[selectedDateKey] = [];
     }
 
-    if (
-        !calendarOutfits[selectedDateKey]
-            .some(i => i.id === itemId)
-    ) {
-
+    if (!calendarOutfits[selectedDateKey].some(i => String(i.id) === String(itemId))) {
         calendarOutfits[selectedDateKey].push(item);
-
-        localStorage.setItem(
-            'wardrobe_calendar',
-            JSON.stringify(calendarOutfits)
-        );
-
+        localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
         renderDayModalContent();
     }
 }
 
-function removeItemFromDate(index) {
-
-    calendarOutfits[selectedDateKey]
-        .splice(index, 1);
-
-    if (
-        calendarOutfits[selectedDateKey].length === 0
-    ) {
+// ลบไอเทมออกจากวันที่กำลังเปิด
+function removeItemFromDayDate(index) {
+    if (!selectedDateKey || !calendarOutfits[selectedDateKey]) return;
+    calendarOutfits[selectedDateKey].splice(index, 1);
+    if (calendarOutfits[selectedDateKey].length === 0) {
         delete calendarOutfits[selectedDateKey];
     }
-
-    localStorage.setItem(
-        'wardrobe_calendar',
-        JSON.stringify(calendarOutfits)
-    );
-
+    localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
     renderDayModalContent();
 }
 
-function saveTodayOutfit() {
+// บันทึกและซิงค์ลง SQLite + Firebase เมื่อกดปุ่มใน Modal
+async function saveDayModalOutfits() {
+    const token = localStorage.getItem('longlook_token');
+    const dayItems = calendarOutfits[selectedDateKey] || [];
 
-    if (!isLoggedIn) {
-        showPopup(
-            '🔒 กรุณาเข้าสู่ระบบก่อนบันทึกลุค',
-            () => {
-                switchPage('login');
+    if (token && dayItems.length > 0) {
+        const title = dayItems.map(i => i.name).join(' + ');
+        const firstImg = dayItems[0]?.image || '';
+        try {
+            await fetch(`${window.LONGLOOK_API}/api/calendar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: title,
+                    style: dayItems[0]?.style || 'CASUAL',
+                    image: firstImg,
+                    log_date: selectedDateKey
+                })
+            });
+            if (typeof loadCalendarHistory === 'function') {
+                loadCalendarHistory();
             }
-        );
-        return;
-    }
-
-    const now = new Date();
-
-    const currentYear =
-        now.getFullYear();
-
-    const monthStr =
-        String(now.getMonth() + 1).padStart(2, '0');
-
-    const dayStr =
-        String(now.getDate()).padStart(2, '0');
-
-    const todayKey =
-        `${currentYear}-${monthStr}-${dayStr}`;
-
-    calendarOutfits[todayKey] =
-        [...closetItems.slice(0, 2)];
-
-    localStorage.setItem(
-        'wardrobe_calendar',
-        JSON.stringify(calendarOutfits)
-    );
-
-    showPopup(
-        '✨ บันทึกลุคประจำวันลงในปฏิทินเรียบร้อยแล้ว!'
-    );
-}
-
-async function saveRandomOutfitToToday() {
-    if (!isLoggedIn || !localStorage.getItem('wardrobe_token')) {
-        showPopup(
-            '🔒 กรุณาเข้าสู่ระบบก่อนบันทึกลุค',
-            () => {
-                switchPage('login');
-            }
-        );
-        return;
-    }
-
-    if (!currentRandomOutfitItems || currentRandomOutfitItems.length === 0) {
-        showPopup('❌ ยังไม่มีลุคที่สุ่มได้ กรุณาสุ่มชุดก่อนบันทึก');
-        return;
-    }
-
-    const itemIds = currentRandomOutfitItems.map(i => i.id);
-
-    try {
-        const response = await fetch(`${getApiBaseUrl()}/api/outfits`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders()
-            },
-            body: JSON.stringify({
-                outfit_name: 'ลุคสุ่มประจำวัน',
-                description: 'สุ่มจากตู้เสื้อผ้า LongLook',
-                items: itemIds,
-                log_to_calendar: true
-            })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
-            const dayStr = String(now.getDate()).padStart(2, '0');
-            const todayKey = `${currentYear}-${monthStr}-${dayStr}`;
-
-            calendarOutfits[todayKey] = [...currentRandomOutfitItems];
-            window.calendarOutfits = calendarOutfits;
-            localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
-
-            if (typeof initRealCalendar === 'function') initRealCalendar();
-            showPopup('✨ บันทึกลุคสุ่มลงใน Oracle Database เรียบร้อยแล้ว!');
-        } else {
-            alert(data.message || 'ไม่สามารถบันทึกลุคลงฐานข้อมูลได้');
+        } catch (e) {
+            console.error('Sync calendar error:', e);
         }
-    } catch (err) {
-        console.error('Save random outfit error:', err);
-        alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึกลุคได้: ' + err.message);
     }
+
+    closeDayModal();
 }
 
-async function loadCalendarFromBackend() {
-    const token = localStorage.getItem('wardrobe_token');
-    if (!token) return;
-
-    try {
-        const response = await fetch(`${getApiBaseUrl()}/api/calendar`, {
-            headers: getAuthHeaders()
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (Array.isArray(data)) {
-                data.forEach(log => {
-                    if (log.date && log.items) {
-                        calendarOutfits[log.date] = log.items.map(it => ({
-                            id: it.id,
-                            name: it.name,
-                            category: it.category,
-                            image: typeof resolveImageUrl === 'function' ? resolveImageUrl(it.image) : it.image
-                        }));
-                    }
-                });
-                window.calendarOutfits = calendarOutfits;
-                localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
-                if (typeof initRealCalendar === 'function') initRealCalendar();
-            }
-        }
-    } catch (err) {
-        console.error('Failed to load calendar from backend:', err);
+// โหลดข้อมูลปฏิทินเริ่มต้น
+function initCalendar() {
+    const saved = localStorage.getItem('wardrobe_calendar');
+    if (saved) {
+        try { calendarOutfits = JSON.parse(saved); } catch (e) {}
     }
+    renderFullCalendar();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCalendar();
+});

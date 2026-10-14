@@ -3,90 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LongLook - Wardrobe & Outfit Planner</title>
+    <title>LongLook - Look Long. Choose Right.</title>
+    <!-- PWA Manifest & Web App Mobile Capabilities -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="LongLook">
+    <meta name="theme-color" content="#FCE8E8">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background-color: #FCE8E8 !important; /* พื้นหลังชมพูอ่อนเรียบเนียน ไม่มีลายจุด */
+            background-image: none !important;
+            color: #4A3E3D;
+        }
+        .logo-font { 
+            font-family: 'Great Vibes', cursive; 
+        }
+    </style>
 </head>
 
-<body class="text-[#333333] antialiased min-h-screen flex flex-col md:flex-row bg-[#FAF7F2]">
+<body class="text-[#4A3E3D] antialiased min-h-screen flex flex-col md:flex-row">
 
     <!-- SIDEBAR -->
-    <aside class="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-[#EAE6DF] flex flex-col justify-between p-6 md:fixed h-auto md:h-full z-20">
+    <aside class="w-full md:w-64 bg-[#3D2B1F] text-[#FFF0F5] border-b md:border-b-0 md:border-r border-[#523B2B] flex flex-col justify-between p-5 md:fixed h-auto md:h-full z-20 overflow-y-auto shadow-md">
         <div>
             <!-- LOGO -->
-            <div class="flex flex-col items-center mb-4 md:mb-8 cursor-pointer" onclick="switchPage('home')">
-                <div class="w-16 h-16 md:w-20 md:h-20 bg-[#F3ECE4] rounded-full flex items-center justify-center mb-2 md:mb-3 shadow-sm border border-[#EAE6DF] relative">
-                    <div class="flex items-center justify-center relative font-serif text-xl md:text-2xl font-bold tracking-tighter">
-                        <span class="text-[#222222] font-serif">L</span>
-                        <span class="text-[#C4A98B] font-serif -ml-1 mt-1">L</span>
-                    </div>
-                    <span class="absolute top-2.5 md:top-3.5 right-2.5 md:right-3.5 text-[#C4A98B] text-[9px] md:text-[10px]">✦</span>
-                </div>
-                <h1 class="font-bold text-base md:text-lg tracking-[0.2em] text-center text-[#222222] -mr-[0.2em]">LONGLOOK</h1>
-                <p class="text-[8px] text-[#A0908E] mt-1 uppercase tracking-[0.1em] font-medium">LOOK LONG. CHOOSE RIGHT.</p>
+            <div class="flex flex-col items-center mb-6 cursor-pointer" onclick="switchPage('home')">
+                <h1 class="logo-font text-5xl font-bold text-[#F5E6DA] tracking-wide hover:scale-105 transition-transform">
+                    LongLook
+                </h1>
+                <p class="text-[9px] text-[#D8C2B0] mt-1 tracking-[0.2em] uppercase font-light">LOOK LONG. CHOOSE RIGHT.</p>
             </div>
 
-            <!-- MENU -->
-            <nav class="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-col gap-2 text-sm">
-                <button onclick="switchPage('home')" id="nav-home" class="w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium bg-[#F3ECE4] text-[#8C6D53] transition">
-                    <span><i class="fa-solid fa-house"></i></span> <span>หน้าหลัก</span>
+            <!-- NAV MENU (เหลือ 6 เมนู ย้ายโทนสีผิวไปหน้าหลักแล้ว) -->
+            <nav class="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-col gap-1.5 text-xs font-medium">
+                <button onclick="switchPage('home')" id="nav-home" class="w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#7A9A8B]"><i class="fa-solid fa-house"></i></span> <span>หน้าหลัก</span>
                 </button>
-                <button onclick="switchPage('closet')" id="nav-closet" class="w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium text-gray-500 hover:bg-gray-50 transition">
-                    <span><i class="fa-solid fa-shirt"></i></span> <span>ตู้เสื้อผ้าของฉัน</span>
+                <button onclick="switchPage('closet')" id="nav-closet" class="w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#F4C2C2]"><i class="fa-solid fa-shirt"></i></span> <span>ตู้เสื้อผ้าของฉัน</span>
                 </button>
-                <button onclick="switchPage('matcher')" id="nav-matcher" class="w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium text-gray-500 hover:bg-gray-50 transition">
-                    <span><i class="fa-solid fa-wand-magic-sparkles"></i></span> <span>ระบบแมตช์ชุด</span>
+                <button onclick="switchPage('matcher')" id="nav-matcher" class="w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#89C2D9]"><i class="fa-solid fa-wand-magic-sparkles"></i></span> <span>ระบบแมตช์ชุด</span>
                 </button>
-                <button onclick="switchPage('builder')" id="nav-builder" class="w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium text-gray-500 hover:bg-gray-50 transition">
-                    <span><i class="fa-solid fa-palette"></i></span> <span>สร้างลุคเอง</span>
+                <button onclick="switchPage('builder')" id="nav-builder" class="w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#DDB892]"><i class="fa-solid fa-palette"></i></span> <span>สร้างลุคเอง</span>
                 </button>
-                <button onclick="switchPage('calendar')" id="nav-calendar" class="w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium text-gray-500 hover:bg-gray-50 transition">
-                    <span><i class="fa-solid fa-calendar-days"></i></span> <span>ปฏิทิน</span>
+                <button onclick="switchPage('calendar')" id="nav-calendar" class="w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#B5A2D9]"><i class="fa-solid fa-calendar-days"></i></span> <span>ปฏิทินประวัติ</span>
                 </button>
-                <button onclick="switchPage('stats')" id="nav-stats" class="col-span-2 sm:col-span-1 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl font-medium text-gray-500 hover:bg-gray-50 transition">
-                    <span><i class="fa-solid fa-chart-pie"></i></span> <span>สถิติ</span>
+                <button onclick="switchPage('stats')" id="nav-stats" class="col-span-2 sm:col-span-1 w-full flex items-center justify-center md:justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-[#EBD9CB] hover:bg-[#523B2B] transition">
+                    <span class="text-sm text-[#E9B44C]"><i class="fa-solid fa-chart-pie"></i></span> <span>สถิติ</span>
                 </button>
             </nav>
         </div>
 
-        <div class="space-y-4 hidden md:block mt-6">
-            <div class="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6] text-center shadow-inner">
-                <div class="flex justify-center gap-2 mb-2">
-                    <span class="text-2xl"><i class="fa-solid fa-shirt text-[#E89387]"></i></span>
-                    <span class="text-2xl"><i class="fa-solid fa-socks text-[#C4A98B]"></i></span>
-                </div>
-                <h4 class="font-bold text-xs text-gray-700">เพิ่มเสื้อผ้าในตู้</h4>
-                <p class="text-[11px] text-gray-400 mb-3">อัปเดตตู้เสื้อผ้าของคุณ</p>
-                <button onclick="openAddClothModal()" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white text-xs font-medium py-2 rounded-xl transition shadow-sm">
-                    + อัปโหลดรูปเสื้อผ้า
-                </button>
-            </div>
+        <div class="hidden md:block mt-6">
+            <button onclick="openCameraModal()" class="w-full bg-[#EBD9CB] hover:bg-[#D8C2B0] text-[#3D2B1F] text-xs font-bold py-2.5 rounded-2xl transition shadow-md flex items-center justify-center gap-2">
+                <i class="fa-solid fa-camera text-[#3D2B1F]"></i> ถ่ายรูป / เพิ่มเสื้อผ้า
+            </button>
         </div>
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="md:ml-64 flex-grow p-4 md:p-8 space-y-6 md:space-y-8">
+    <main class="md:ml-64 flex-grow p-4 md:p-8 space-y-6">
 
         <!-- HEADER -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm">
             <div>
-                <h2 id="greeting-text" class="text-xl md:text-2xl font-bold text-[#333333]">สวัสดีตอนเช้า! <i class="fa-solid fa-sun text-yellow-500"></i></h2>
-                <p class="text-xs md:text-sm text-gray-400">วันนี้มีอะไรใส่ดีน้า~ ให้เราช่วยแมตช์ชุดให้คุณไหม?</p>
+                <h2 id="greeting-text" class="text-xl font-bold text-[#3D2B1F]">สวัสดีตอนเช้า! ☀️</h2>
+                <p class="text-xs text-[#6B5647] mt-1">วันนี้มีอะไรใส่ดีน้า~ ให้เราช่วยแมตช์ชุดให้คุณไหม?</p>
             </div>
 
-            <div class="flex items-center gap-3 self-end sm:self-auto">
-                <div id="user-profile-container" class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
-                    <span class="w-7 h-7 bg-[#F3ECE4] text-[#8C6D53] rounded-full flex items-center justify-center text-xs font-bold" id="user-avatar-icon"><i class="fa-solid fa-user"></i></span>
-                    <span class="text-xs md:text-sm font-semibold text-gray-700" id="user-name-label">ผู้เยี่ยมชม</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-[#FCE8E8] px-4 py-2 rounded-full border border-[#D8C2B0] shadow-sm">
+                    <span class="w-6 h-6 bg-[#3D2B1F] text-white rounded-full flex items-center justify-center text-[10px]" id="user-avatar-icon"><i class="fa-solid fa-user"></i></span>
+                    <span class="text-xs font-semibold text-[#3D2B1F]" id="user-name-label">ผู้เยี่ยมชม</span>
                 </div>
-                <button id="btn-login-trigger" onclick="switchPage('login')" class="bg-[#8C6D53] hover:bg-[#755a43] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm">
-                    <i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ
+                <button id="btn-login-trigger" onclick="openLoginModal()" class="bg-[#3D2B1F] hover:bg-[#523B2B] text-white text-xs px-4 py-2 rounded-full font-medium transition shadow-sm">
+                    เข้าสู่ระบบ / สมัครสมาชิก
                 </button>
             </div>
         </header>
@@ -95,73 +96,99 @@
         <div id="page-home" class="page-content space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-[#EAE6DF] space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-base md:text-lg text-gray-800">ลุคแนะนำสำหรับวันนี้</h3>
-                        <span id="current-date-badge" class="text-xs bg-[#F3ECE4] text-[#8C6D53] px-3 py-1 rounded-full font-medium">วันนี้</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6]">
-                        <div id="home-outfit-preview" class="relative bg-white p-4 rounded-2xl flex flex-col items-center justify-center border border-[#EAE6DF] min-h-56 gap-2">
-                            <span class="text-4xl text-gray-300"><i class="fa-solid fa-shirt"></i></span>
-                            <p class="text-xs text-gray-400">ยังไม่มีการแมตช์ชุดวันนี้</p>
+                <!-- ฝั่งซ้าย: ลุคแนะนำ + โทนสีผิว & เพศ -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- 1. ลุคแนะนำสำหรับวันนี้ -->
+                    <div class="bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-base text-[#3D2B1F]">✨ ลุคแนะนำสำหรับวันนี้</h3>
+                            <span id="current-date-badge" class="text-xs bg-[#FCE8E8] text-[#3D2B1F] border border-[#D8C2B0] px-3 py-1 rounded-full font-medium">14 ตุลาคม 2569</span>
                         </div>
 
-                        <div class="space-y-3">
-                            <div>
-                                <h4 id="home-outfit-title" class="font-bold text-base text-gray-800">ลุคสบายๆ วันชิล</h4>
-                                <span id="home-outfit-style" class="inline-block bg-pink-50 text-[#E89387] text-[10px] px-2.5 py-0.5 rounded-md font-semibold mt-1">Casual</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                            <div id="home-outfit-preview" class="relative bg-white p-6 rounded-2xl flex flex-col items-center justify-center border border-dashed border-[#D8C2B0] min-h-48 gap-2">
+                                <span class="text-4xl text-[#3D2B1F]"><i class="fa-solid fa-shirt"></i></span>
+                                <p class="text-xs text-[#6B5647]">ยังไม่มีการแมตช์ชุดวันนี้</p>
                             </div>
 
-                            <div class="text-xs text-gray-600 space-y-1">
-                                <p><i class="fa-solid fa-[#E89387] fa-cloud-sun mr-1"></i> อากาศปัจจุบัน: <span id="weather-temp-sub" class="font-medium text-gray-800">25°C</span></p>
-                                <p><i class="fa-solid fa-tags mr-1"></i> สไตล์: <span class="font-medium text-gray-800">Casual / Daily</span></p>
-                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 id="home-outfit-title" class="font-bold text-base text-[#3D2B1F]">ลุคสบายๆ วันชิลล์</h4>
+                                    <span id="home-outfit-style" class="inline-block bg-[#EBD9CB] text-[#3D2B1F] border border-[#D8C2B0] text-[10px] px-2.5 py-0.5 rounded-md font-semibold mt-1">Casual</span>
+                                </div>
 
-                            <div class="flex flex-col sm:flex-row items-center gap-2 pt-2">
-                                <button id="btn-favorite" onclick="toggleFavorite()" class="w-full sm:flex-1 bg-[#E89387] hover:bg-[#d88276] text-white py-2 rounded-xl text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1">
-                                    <span id="fav-icon"><i class="fa-solid fa-check"></i></span> <span id="fav-text">บันทึกลุคลงวันนี้</span>
-                                </button>
-                                <button onclick="switchPage('matcher')" class="w-full sm:w-auto bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
-                                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> แมตช์ชุดใหม่
+                                <div class="text-xs text-[#6B5647] space-y-1">
+                                    <p><i class="fa-solid fa-sun text-[#E9B44C] mr-1"></i> อากาศปัจจุบัน: <span id="weather-temp-sub" class="font-bold text-[#3D2B1F]">25°C</span></p>
+                                    <p><i class="fa-solid fa-tag text-[#D88AAB] mr-1"></i> สไตล์: <span class="font-bold text-[#3D2B1F]">Casual / Daily</span></p>
+                                </div>
+
+                                <button onclick="saveTodayOutfitToCalendar()" class="w-full bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-2.5 rounded-xl text-xs font-medium transition shadow-md">
+                                    📌 บันทึกลุคและเสื้อผ้าที่ใส่ลงปฏิทินวันนี้
                                 </button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. โทนสีผิว (Personal Color) & เลือกเพศ (อยู่หน้าหลักใต้ลุคแนะนำแล้ว) -->
+                    <div class="bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-4">
+                        <h3 class="font-bold text-base text-[#3D2B1F] flex items-center gap-2">
+                            <span>👤</span> โทนสีผิว (Personal Color) & เลือกเพศ
+                        </h3>
+                        <div class="bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-[#6B5647] mb-1.5">เลือกเพศการแต่งตัว</label>
+                                    <select id="user-gender" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
+                                        <option value="unisex">Unisex / ทั่วไป</option>
+                                        <option value="female">ผู้หญิง (Female)</option>
+                                        <option value="male">ผู้ชาย (Male)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-[#6B5647] mb-1.5">เลือกโทนสีผิว (Skin Tone)</label>
+                                    <select id="user-skintone" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
+                                        <option value="warm">Warm Tone (ผิวสองสี / โทนเหลือง)</option>
+                                        <option value="cool">Cool Tone (ผิวขาว / โทนชมพู)</option>
+                                        <option value="neutral">Neutral Tone (ผิวโทนธรรมชาติ)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="saveUserProfileToDatabase()" class="w-full bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-2.5 rounded-xl text-xs font-medium transition shadow-md">
+                                บันทึกข้อมูลส่วนตัวเข้า Database
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
+                <!-- ฝั่งขวา: สภาพอากาศ & ปฏิทิน -->
                 <div class="space-y-6">
-                    <!-- WEATHER CARD -->
-                    <div class="bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-[#EAE6DF] space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-base text-gray-800">สภาพอากาศวันนี้</h3>
-                            <span class="text-xs text-gray-400">เรียลไทม์</span>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6]">
+                    <div class="bg-[#EBD9CB] p-5 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-3">
+                        <h3 class="font-bold text-sm text-[#3D2B1F]">☀️ สภาพอากาศวันนี้</h3>
+                        <div class="flex items-center justify-between bg-[#FCE8E8] p-3.5 rounded-2xl border border-[#D8C2B0]">
                             <div class="flex items-center gap-3">
-                                <span class="text-3xl text-yellow-400"><i class="fa-solid fa-sun"></i></span>
+                                <span class="text-3xl text-[#E9B44C]"><i class="fa-solid fa-sun"></i></span>
                                 <div>
-                                    <h4 id="weather-temp" class="font-bold text-xl text-gray-800">25°C</h4>
-                                    <p class="text-xs text-gray-500">แจ่มใส</p>
+                                    <h4 id="weather-temp" class="font-bold text-lg text-[#3D2B1F]">25°C</h4>
+                                    <p class="text-xs text-[#6B5647]">แจ่มใส เหมาะกับการแต่งกายสบายๆ</p>
                                 </div>
                             </div>
                         </div>
-                        <p id="weather-advice" class="text-xs text-gray-500 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100 flex items-center gap-2">
-                            <span><i class="fa-solid fa-shirt text-blue-400"></i></span> สภาพอากาศเหมาะกับการแต่งกายลุคโปร่งสบาย (25°C)
-                        </p>
                     </div>
 
-                    <!-- CALENDAR CARD -->
-                    <div class="bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-[#EAE6DF] space-y-3">
+                    <div class="bg-[#EBD9CB] p-5 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 id="calendar-month-year" class="font-bold text-base text-gray-800">ปฏิทินแต่งตัว</h3>
-                            <span onclick="switchPage('calendar')" class="text-xs text-[#8C6D53] cursor-pointer font-medium hover:underline">ดูทั้งหมด</span>
+                            <h3 class="font-bold text-sm text-[#3D2B1F]">📅 ปฏิทินการแต่งตัว</h3>
+                            <span onclick="switchPage('calendar')" class="text-xs text-[#6B5647] font-semibold hover:underline cursor-pointer">ดูทั้งหมด</span>
                         </div>
-                        <div class="grid grid-cols-7 text-center text-xs text-gray-400 gap-1 font-medium">
+                        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-[#6B5647] gap-1">
                             <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
                         </div>
-                        <!-- แก้ไขจุดนี้: ใช้ real-calendar-grid เพื่อให้ JS สร้างวันที่จริงอัตโนมัติ -->
-                        <div id="real-calendar-grid" class="grid grid-cols-7 text-center text-xs gap-y-2 py-1 font-medium text-gray-700">
+                        <div class="grid grid-cols-7 text-center text-xs gap-1 font-medium bg-[#FCE8E8] p-2 rounded-xl border border-[#D8C2B0]">
+                            <span class="text-gray-400">11</span><span class="text-gray-400">12</span><span class="text-gray-400">13</span>
+                            <span class="bg-[#3D2B1F] text-white font-bold rounded-lg py-0.5">14</span>
+                            <span>15</span><span>16</span><span>17</span>
                         </div>
                     </div>
                 </div>
@@ -169,562 +196,318 @@
             </div>
         </div>
 
-        <!-- PAGE 2: MY CLOSET -->
+        <!-- PAGE 2: CLOSET -->
         <div id="page-closet" class="page-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-shirt text-[#8C6D53] mr-2"></i> ตู้เสื้อผ้าของฉัน (MY CLOSET)</h2>
-                        <p class="text-xs text-gray-400">จัดการและดูรายการเสื้อผ้าทั้งหมดที่คุณมี</p>
-                    </div>
-                    <button onclick="openAddClothModal()" class="bg-[#E89387] hover:bg-[#d88276] text-white px-4 py-2 rounded-xl text-xs font-semibold transition shadow-sm">
-                        + อัปโหลดรูปเสื้อผ้า
+            <div class="bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-[#3D2B1F]">👕 ตู้เสื้อผ้าของฉัน</h2>
+                    <button onclick="openCameraModal()" class="bg-[#3D2B1F] text-white px-4 py-2 rounded-xl text-xs font-medium shadow-sm">
+                        + เพิ่มเสื้อผ้าใหม่
                     </button>
                 </div>
-
-                <!-- SEARCH & FILTER -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6]">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-gray-500 mb-1">หมวดหมู่เสื้อผ้า</label>
-                        <select id="filter-category" onchange="renderCloset()" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                            <option value="ALL">ทั้งหมด</option>
-                            <option value="เสื้อ">เสื้อ</option>
-                            <option value="กางเกง">กางเกง</option>
-                            <option value="กระโปรง">กระโปรง</option>
-                            <option value="เดรส">เดรส</option>
-                            <option value="รองเท้า">รองเท้า</option>
-                            <option value="กระเป๋า">กระเป๋า</option>
-                            <option value="เครื่องประดับ">เครื่องประดับ</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-gray-500 mb-1">กรองสไตล์เสื้อผ้า</label>
-                        <select id="filter-style" onchange="renderCloset()" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                            <option value="ALL">ทุกสไตล์</option>
-                            <option value="CASUAL">CASUAL</option>
-                            <option value="KOREAN">KOREAN</option>
-                            <option value="VINTAGE">VINTAGE</option>
-                            <option value="STREET">STREET</option>
-                            <option value="FORMAL">FORMAL</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-gray-500 mb-1">ค้นหาชื่อเสื้อผ้า</label>
-                        <input type="text" id="search-keyword" oninput="renderCloset()" placeholder="พิมพ์ชื่อ..." class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-white">
-                    </div>
-                </div>
-
-                <!-- CLOTHES GRID -->
-                <div id="closet-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div id="closet-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <p class="text-xs text-[#6B5647] col-span-full text-center py-6">กำลังโหลดข้อมูลจากเซิร์ฟเวอร์...</p>
                 </div>
             </div>
         </div>
 
-        <!-- PAGE 3: AUTOMATIC OUTFIT MATCHER -->
-        <div id="page-matcher" class="page-content hidden space-y-6">
-            <h2 class="text-2xl font-bold">✨ ระบบแมตช์ชุดอัตโนมัติ</h2>
-
-            <div class="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-6 text-center">
-                <p class="text-sm text-gray-500">
-                    ระบบจะช่วยสุ่มจับคู่เสื้อผ้าแบบเต็มตัวจากตู้เสื้อผ้าของคุณให้อัตโนมัติ!
-                </p>
-
-                <button onclick="randomOutfit()" class="bg-[#E89387] hover:bg-[#d88276] text-white px-8 py-3 rounded-2xl text-sm font-semibold transition shadow-sm">
-                    🎲 สุ่มลุคเต็มตัววันนี้
-                </button>
-
-                <div id="match-result-box" class="hidden p-6 bg-[#FAF7F2] rounded-3xl border border-[#EFECE6] space-y-4">
-                    <h3 class="font-bold text-gray-800">🎉 ลุคที่สุ่มได้สำหรับคุณวันนี้</h3>
-
-                    <div id="outfit-display-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2"></div>
-
-                    <p id="match-text" class="text-xs text-gray-500 font-medium pt-2"></p>
-
-                    <button onclick="saveRandomOutfitToToday()" class="bg-[#E89387] hover:bg-[#d88276] text-white px-6 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm">
-                        📌 บันทึกลุคนี้ใส่ในวันนี้
+        <!-- PAGE 3: MATCHER -->
+        <div id="page-matcher" class="page-content hidden bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-6">
+            <h2 class="text-lg font-bold text-[#3D2B1F]"><i class="fa-solid fa-wand-magic-sparkles text-[#89C2D9] mr-2"></i> ระบบสุ่มแมตช์ชุดลองใส่จริง</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-4 bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                    <h3 class="font-bold text-sm text-[#3D2B1F]">เลือกเงื่อนไขการแต่งตัว</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-[#6B5647] mb-1">โอกาส (Occasion)</label>
+                        <select class="w-full p-2.5 text-xs rounded-xl border border-[#D8C2B0] bg-white">
+                            <option>ไปเรียน / ไปทำงาน</option>
+                            <option>เดินเล่น / ไปคาเฟ่</option>
+                            <option>ออกเดท / ไปเที่ยวกับเพื่อน</option>
+                            <option>งานทางการ / งานสัมมนา</option>
+                            <option>ออกกำลังกาย / สปอร์ต</option>
+                            <option>ปาร์ตี้ / สังสรรค์กลางคืน</option>
+                            <option>อยู่บ้าน / วันชิลล์ๆ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-[#6B5647] mb-1">สไตล์ (Style)</label>
+                        <select class="w-full p-2.5 text-xs rounded-xl border border-[#D8C2B0] bg-white">
+                            <option>CASUAL (สบายๆ เป็นธรรมชาติ)</option>
+                            <option>KOREAN / MINIMAL (มินิมอลสายเกาหลี)</option>
+                            <option>STREETWEAR (สตรีทเท่ๆ)</option>
+                            <option>VINTAGE / Y2K (วินเทจย้อนยุค)</option>
+                            <option>FORMAL / ELEGANT (เรียบหรู ดูแพง)</option>
+                            <option>SPORTY (สปอร์ตลุค)</option>
+                            <option>PREPPY (ลุคนักเรียนนักศึกษา)</option>
+                        </select>
+                    </div>
+                    <button onclick="triggerAutoMatchAndFitting()" class="w-full bg-[#3D2B1F] text-white py-3 rounded-xl text-xs font-medium shadow-md">
+                        🎲 สุ่มจับคู่แมตช์ใส่บนหุ่น!
                     </button>
+                    <button onclick="saveCurrentMatchToCalendar()" class="w-full bg-[#7A9A8B] hover:bg-[#688577] text-white py-2.5 rounded-xl text-xs font-medium shadow-md transition">
+                        📅 บันทึกชุดที่สุ่มได้ลงปฏิทิน
+                    </button>
+                </div>
+
+                <div class="md:col-span-2 bg-[#FCE8E8] p-6 rounded-2xl border border-[#D8C2B0] shadow-sm flex flex-col items-center justify-center relative min-h-[380px]">
+                    <h3 class="text-xs font-bold text-[#6B5647] absolute top-4 left-4">👕 ลองใส่บนหุ่นจำลอง</h3>
+                    
+                    <div id="avatar-fitting-container" class="relative w-48 h-80 flex flex-col items-center justify-center border border-dashed border-[#D8C2B0] rounded-2xl bg-white p-2">
+                        <svg viewBox="0 0 100 200" class="w-32 h-64 opacity-20 absolute">
+                            <circle cx="50" cy="25" r="15" fill="#3D2B1F"/>
+                            <path d="M 30 45 L 70 45 L 65 110 L 35 110 Z" fill="#3D2B1F"/>
+                            <rect x="37" y="112" width="10" height="70" fill="#3D2B1F"/>
+                            <rect x="53" y="112" width="10" height="70" fill="#3D2B1F"/>
+                        </svg>
+
+                        <div id="avatar-top-layer" class="z-10 w-28 h-28 flex items-center justify-center transition-all">
+                            <span class="text-xs text-[#6B5647]">เสื้อ</span>
+                        </div>
+                        <div id="avatar-bottom-layer" class="z-10 w-28 h-28 flex items-center justify-center -mt-4 transition-all">
+                            <span class="text-xs text-[#6B5647]">กางเกง/กระโปรง</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- PAGE 4: MANUAL OUTFIT BUILDER -->
-        <div id="page-builder" class="page-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-palette text-[#8C6D53] mr-2"></i> สร้างลุคเอง (OUTFIT BUILDER)</h2>
-                    <p class="text-xs text-gray-400">เลือกไอเทมจากเสื้อ+กางเกง+รองเท้า ตามใจคุณ</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-700">1. เลือกเสื้อ (Top)</label>
-                        <select id="builder-top" onchange="previewBuilder()" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-[#FAF7F2]">
-                            <option value="">-- เลือกเสื้อ --</option>
+        <!-- PAGE 4: BUILDER -->
+        <div id="page-builder" class="page-content hidden bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-6">
+            <h2 class="text-lg font-bold text-[#3D2B1F]"><i class="fa-solid fa-palette text-[#DDB892] mr-2"></i> สร้างลุคและจับคู่ใส่บนหุ่น</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4 bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-[#6B5647] mb-1">1. เลือกเสื้อ</label>
+                        <select id="builder-top-select" onchange="previewClothesOnModel()" class="w-full p-2.5 text-xs rounded-xl border border-[#D8C2B0] bg-white">
+                            <option value="">-- เลือกเสื้อในตู้ของคุณ --</option>
                         </select>
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-700">2. เลือกกางเกง/กระโปรง (Bottom)</label>
-                        <select id="builder-bottom" onchange="previewBuilder()" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-[#FAF7F2]">
+                    <div>
+                        <label class="block text-xs font-bold text-[#6B5647] mb-1">2. เลือกกางเกง / กระโปรง</label>
+                        <select id="builder-bottom-select" onchange="previewClothesOnModel()" class="w-full p-2.5 text-xs rounded-xl border border-[#D8C2B0] bg-white">
                             <option value="">-- เลือกกางเกง/กระโปรง --</option>
                         </select>
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-700">3. เลือกรองเท้า (Shoes)</label>
-                        <select id="builder-shoes" onchange="previewBuilder()" class="w-full p-2 text-xs rounded-xl border border-gray-200 bg-[#FAF7F2]">
-                            <option value="">-- เลือกรองเท้า --</option>
-                        </select>
+                    <button onclick="saveBuilderOutfitToCalendar()" class="w-full bg-[#3D2B1F] text-white py-3 rounded-xl text-xs font-medium shadow-md">
+                        💾 บันทึกลุคนี้เข้าสู่ปฏิทิน
+                    </button>
+                </div>
+
+                <div class="bg-[#FCE8E8] p-6 rounded-2xl border border-[#D8C2B0] shadow-sm flex flex-col items-center justify-center min-h-[300px]">
+                    <div class="relative w-44 h-72 flex flex-col items-center justify-center border border-dashed border-[#D8C2B0] rounded-2xl bg-white p-2">
+                        <div id="builder-model-top" class="w-24 h-24 flex items-center justify-center">
+                            <p class="text-[10px] text-[#6B5647]">ตัวอย่างเสื้อ</p>
+                        </div>
+                        <div id="builder-model-bottom" class="w-24 h-24 flex items-center justify-center -mt-2">
+                            <p class="text-[10px] text-[#6B5647]">ตัวอย่างกางเกง</p>
+                        </div>
                     </div>
                 </div>
-
-                <div id="builder-preview-box" class="bg-[#FAF7F2] p-6 rounded-2xl border border-[#EFECE6] flex justify-center items-center gap-4 min-h-40">
-                    <p class="text-xs text-gray-400">กรุณาเลือกไอเทมเพื่อดูตัวอย่างชุด</p>
-                </div>
-
-                <button onclick="saveManualOutfit()" class="w-full bg-[#8C6D53] hover:bg-[#755a43] text-white py-3 rounded-xl text-xs font-semibold">
-                    <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกเป็น OUTFIT ของฉัน
-                </button>
             </div>
         </div>
 
         <!-- PAGE 5: CALENDAR -->
-        <div id="page-calendar" class="page-content space-y-6 hidden">
-            <h2 class="text-2xl font-bold">📅 ปฏิทินแต่งตัว</h2>
-
-            <div class="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 id="full-calendar-title" class="font-bold text-lg text-gray-800"></h3>
-
-                    <span class="text-xs text-gray-400">
-                        คลิกที่วันเพื่อดูประวัติ หรือวางแผนชุดวันถัดไป
-                    </span>
+        <div id="page-calendar" class="page-content hidden space-y-6">
+            <!-- ตารางปฏิทินรายเดือน -->
+            <div class="bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#3D2B1F] flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-[#B5A2D9]"></i> 
+                            <span id="full-calendar-title">ปฏิทินการแต่งตัว</span>
+                        </h2>
+                        <p class="text-xs text-[#6B5647]">คลิกที่ช่องวันที่เพื่อดู จัดการ หรือวางแผนชุดที่ใส่ในวันนั้น</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeCalendarMonth(-1)" class="w-8 h-8 rounded-full bg-[#FCE8E8] hover:bg-white text-[#3D2B1F] border border-[#D8C2B0] flex items-center justify-center text-xs shadow-sm transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button onclick="changeCalendarMonth(0)" class="px-3 py-1 rounded-xl bg-[#3D2B1F] text-white text-xs font-semibold shadow-sm transition">
+                            วันนี้
+                        </button>
+                        <button onclick="changeCalendarMonth(1)" class="w-8 h-8 rounded-full bg-[#FCE8E8] hover:bg-white text-[#3D2B1F] border border-[#D8C2B0] flex items-center justify-center text-xs shadow-sm transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 gap-2">
-                    <span>อา</span>
+                <div class="grid grid-cols-7 text-center text-xs font-bold text-[#6B5647] gap-2 py-1">
+                    <span class="text-red-400">อา</span>
                     <span>จ</span>
                     <span>อ</span>
                     <span>พ</span>
                     <span>พฤ</span>
                     <span>ศ</span>
-                    <span>ส</span>
+                    <span class="text-blue-400">ส</span>
                 </div>
 
-                <div id="full-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+                <div id="full-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-xs"></div>
             </div>
         </div>
 
         <!-- PAGE 6: STATS -->
-        <div id="page-stats" class="page-content hidden bg-white p-8 rounded-3xl border border-[#EAE6DF] space-y-6">
-            <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-chart-pie text-[#8C6D53] mr-2"></i> สถิติการแต่งตัว (STATISTICS)</h2>
+        <div id="page-stats" class="page-content hidden bg-[#EBD9CB] p-6 rounded-3xl border border-[#D8C2B0] shadow-sm space-y-6">
+            <h2 class="text-lg font-bold text-[#3D2B1F]">📊 สถิติตู้เสื้อผ้าและการแต่งตัว</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6] text-center">
-                    <p class="text-xs text-gray-400">จำนวนเสื้อผ้าในตู้</p>
-                    <h3 id="stat-total-clothes" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
+                <div class="bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                    <p class="text-xs text-[#6B5647]">จำนวนเสื้อผ้าทั้งหมด</p>
+                    <h3 id="stat-total-clothes" class="text-3xl font-bold text-[#3D2B1F] mt-1">0</h3>
                 </div>
-                <div class="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6] text-center">
-                    <p class="text-xs text-gray-400">จำนวน OUTFIT ที่สร้าง</p>
-                    <h3 id="stat-total-outfits" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
+                <div class="bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                    <p class="text-xs text-[#6B5647]">จำนวนวันที่บันทึกชุดใส่แล้ว</p>
+                    <h3 id="stat-total-outfits" class="text-3xl font-bold text-[#3D2B1F] mt-1">0</h3>
                 </div>
-                <div class="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFECE6] text-center">
-                    <p class="text-xs text-gray-400">สไตล์ที่แต่งบ่อยที่สุด</p>
-                    <h3 id="stat-top-style" class="text-xl font-bold text-[#E89387] mt-1">CASUAL</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE: LOGIN -->
-        <div id="page-login" class="page-content flex justify-center items-center py-12 hidden">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-[#EAE6DF] w-full max-w-md space-y-4">
-
-                <h2 class="text-xl font-bold text-center">เข้าสู่ระบบ</h2>
-
-                <form onsubmit="handleLogin(event)" class="space-y-4">
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            ชื่อผู้ใช้ (Username)
-                        </label>
-
-                        <input type="text" id="login-user" placeholder="กรอกชื่อผู้ใช้" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            รหัสผ่าน (Password)
-                        </label>
-
-                        <input type="password" id="login-pass" placeholder="กรอกรหัสผ่าน" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <button type="submit" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-3 rounded-xl text-sm font-semibold transition shadow-sm">
-                        เข้าสู่ระบบ
-                    </button>
-                </form>
-
-                <div class="text-center pt-2 border-t border-gray-100">
-                    <p class="text-xs text-gray-500">
-                        ยังไม่มีบัญชีใช่ไหม?
-                        <span onclick="switchPage('register')" class="text-[#E89387] font-semibold cursor-pointer hover:underline">
-                            สมัครสมาชิกที่นี่
-                        </span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE: REGISTER -->
-        <div id="page-register" class="page-content flex justify-center items-center py-12 hidden">
-            <div class="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm w-full max-w-md space-y-4">
-
-                <h2 class="text-xl font-bold text-center">สมัครสมาชิกใหม่</h2>
-
-                <form onsubmit="handleRegister(event)" class="space-y-4">
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            ชื่อผู้ใช้สำหรับเข้าสู่ระบบ (Username)
-                        </label>
-
-                        <input type="text" id="reg-user" placeholder="เช่น user123" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            ชื่อที่แสดงในแอคเคานต์ (Account Name)
-                        </label>
-
-                        <input type="text" id="reg-display-name" placeholder="เช่น น้องฟ้าใส / คุณแม่บ้าน" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            ตั้งรหัสผ่าน (Password)
-                        </label>
-
-                        <input type="password" id="reg-pass" placeholder="กรอกรหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">
-                            ยืนยันรหัสผ่าน (Confirm Password)
-                        </label>
-
-                        <input type="password" id="reg-pass-confirm" placeholder="กรอกรหัสผ่านอีกครั้ง" required class="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    <button type="submit" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-3 rounded-xl text-sm font-semibold transition shadow-sm">
-                        สมัครสมาชิก
-                    </button>
-                </form>
-
-                <div class="text-center pt-2 border-t border-gray-100">
-                    <p class="text-xs text-gray-500">
-                        มีบัญชีอยู่แล้ว?
-                        <span onclick="switchPage('login')" class="text-[#E89387] font-semibold cursor-pointer hover:underline">
-                            เข้าสู่ระบบที่นี่
-                        </span>
-                    </p>
+                <div class="bg-[#FCE8E8] p-5 rounded-2xl border border-[#D8C2B0] shadow-sm">
+                    <p class="text-xs text-[#6B5647]">สไตล์ที่ใส่บ่อยที่สุด</p>
+                    <h3 id="stat-top-style" class="text-xl font-bold text-[#3D2B1F] mt-1">CASUAL</h3>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL ปฏิทิน: จัดการชุดประจำวัน -->
-    <div id="day-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 md:p-8 rounded-3xl w-full max-w-lg shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 id="modal-day-title" class="text-lg font-bold text-gray-800">
-                    จัดการชุดประจำวัน
+    <!-- MODAL 1: ถ่ายรูป/เพิ่มเสื้อผ้า -->
+    <div id="camera-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#FCE8E8] w-full max-w-md rounded-3xl p-6 shadow-xl border border-[#D8C2B0] relative space-y-4">
+            <button onclick="closeCameraModal()" class="absolute top-4 right-4 text-gray-500 font-bold"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-base font-bold text-[#3D2B1F]">📷 เพิ่มเสื้อผ้า (กล้อง / อัปโหลด)</h3>
+
+            <div class="bg-[#3D2B1F] rounded-2xl h-48 flex items-center justify-center overflow-hidden relative">
+                <video id="webcam-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                <span id="camera-placeholder" class="text-white text-xs text-center px-4">กด "เปิดกล้อง" เพื่อขออนุญาตใช้งานกล้อง</span>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="startCameraPermission()" class="flex-1 bg-[#EBD9CB] text-[#3D2B1F] font-bold py-2 rounded-xl text-xs">เปิดกล้อง</button>
+                <button onclick="takeCameraPhoto()" class="flex-1 bg-[#3D2B1F] text-white py-2 rounded-xl text-xs font-medium">ถ่ายรูป</button>
+            </div>
+
+            <input type="file" id="file-upload-input" accept="image/*" class="text-xs text-gray-500 w-full">
+            <input type="text" id="cloth-name-input" placeholder="ชื่อเสื้อผ้า (เช่น เสื้อยืดโอเวอร์ไซส์, กางเกงยีนส์)" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-[#6B5647] mb-1">หมวดหมู่</label>
+                    <select id="cloth-category-input" class="w-full p-2 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
+                        <option value="เสื้อ">👕 ท่อนบน (เสื้อ / แจ็คเก็ต)</option>
+                        <option value="กางเกง">👖 ท่อนล่าง (กางเกง / กระโปรง)</option>
+                        <option value="เดรส">👗 เดรส / ชุดติดกัน</option>
+                        <option value="อื่นๆ">👟 อื่นๆ / เครื่องประดับ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-[#6B5647] mb-1">สไตล์</label>
+                    <select id="cloth-style-input" class="w-full p-2 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
+                        <option value="CASUAL">Casual</option>
+                        <option value="KOREAN">Korean / Minimal</option>
+                        <option value="STREETWEAR">Streetwear</option>
+                        <option value="VINTAGE">Vintage / Y2K</option>
+                        <option value="FORMAL">Formal</option>
+                        <option value="SPORTY">Sporty</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="saveClothToDatabase()" class="w-full bg-[#3D2B1F] text-white py-2.5 rounded-xl text-xs font-medium shadow-md">บันทึกลง Database</button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: สมัครสมาชิก & เข้าสู่ระบบ -->
+    <div id="login-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#FCE8E8] w-full max-w-sm rounded-3xl p-6 shadow-xl border border-[#D8C2B0] relative space-y-4">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-500 font-bold"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="flex border-b border-[#D8C2B0]">
+                <button id="tab-login-btn" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-xs font-bold text-[#3D2B1F] border-b-2 border-[#3D2B1F]">เข้าสู่ระบบ</button>
+                <button id="tab-register-btn" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-xs font-bold text-[#6B5647]">สมัครสมาชิก</button>
+            </div>
+
+            <form id="form-login" onsubmit="handleUserLogin(event)" class="space-y-3">
+                <input type="text" id="login-username" required placeholder="ชื่อผู้ใช้งาน" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+                <input type="password" id="login-password" required placeholder="รหัสผ่าน" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+                <button type="submit" class="w-full bg-[#3D2B1F] text-white py-2.5 rounded-xl text-xs font-medium shadow-md">เข้าสู่ระบบ</button>
+            </form>
+
+            <form id="form-register" onsubmit="handleUserRegister(event)" class="space-y-3 hidden">
+                <input type="text" id="reg-username" required placeholder="ตั้งชื่อผู้ใช้งาน" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+                <input type="password" id="reg-password" required placeholder="ตั้งรหัสผ่าน" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+                <button type="submit" class="w-full bg-[#3D2B1F] text-white py-2.5 rounded-xl text-xs font-medium shadow-md">บันทึกสมัครสมาชิก</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: จัดการชุดประจำวัน (Day Modal) -->
+    <div id="day-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#FCE8E8] w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-[#D8C2B0] relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-[#D8C2B0] pb-3">
+                <h3 id="modal-day-title" class="text-base font-bold text-[#3D2B1F] flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-[#89C2D9]"></i> จัดการชุดประจำวัน
                 </h3>
-                <button onclick="closeDayModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold">
-                    ✕
-                </button>
+                <button onclick="closeDayModal()" class="text-gray-500 hover:text-black font-bold p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
+            <!-- ชุดที่วางแผนไว้ในวันนี้ -->
             <div class="space-y-2">
-                <p class="text-xs text-gray-500">
-                    ชุดที่ใส่หรือวางแผนไว้สำหรับวันนี้:
-                </p>
-                <div id="modal-outfit-list" class="flex flex-wrap gap-2 min-h-[60px] p-3 bg-[#FAF7F2] rounded-2xl border border-[#EFECE6] items-center"></div>
+                <label class="block text-xs font-bold text-[#6B5647]">ชุดที่ใส่ในวันนี้:</label>
+                <div id="modal-outfit-list" class="flex flex-wrap gap-2 min-h-[70px] p-3 bg-white rounded-2xl border border-[#D8C2B0] items-center">
+                    <p class="text-xs text-gray-400 w-full text-center py-2">ยังไม่มีชุดที่เลือก</p>
+                </div>
             </div>
 
-            <div class="space-y-2 pt-2">
-                <p class="text-xs font-semibold text-gray-700">
-                    เลือกไอเทมจากตู้เพื่อใส่ในวันนี้:
-                </p>
-                <div id="modal-closet-selector" class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1"></div>
+            <!-- เลือกเสื้อผ้าจากตู้ -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-[#6B5647]">คลิกเลือกเสื้อผ้าจากตู้เพื่อใส่ในวันนี้:</label>
+                <div id="modal-closet-selector" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 bg-[#EBD9CB] rounded-2xl border border-[#D8C2B0]">
+                </div>
             </div>
 
-            <button onclick="closeDayModal()" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-2.5 rounded-xl text-xs font-semibold transition">
-                เสร็จสิ้น
+            <button onclick="saveDayModalOutfits()" class="w-full bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-3 rounded-xl text-xs font-medium shadow-md transition">
+                💾 บันทึกชุดลงปฏิทิน & ปิดหน้าต่าง
             </button>
         </div>
     </div>
 
-    <!-- MODAL: ADD CLOTH -->
-    <div id="add-cloth-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-xl border border-[#EAE6DF] relative space-y-4 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeAddClothModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-gray-800">เพิ่มเสื้อผ้าใหม่เข้าตู้</h3>
-
-            <form onsubmit="handleAddCloth(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">รูปภาพเสื้อผ้า (ถ่ายรูป/อัปโหลด)</label>
-                    <input type="file" id="cloth-image" accept="image/*" required class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#F3ECE4] file:text-[#8C6D53]">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อเสื้อผ้า</label>
-                    <input type="text" id="cloth-name" required placeholder="เช่น เสื้อเชิ้ตขาว" class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">หมวดหมู่</label>
-                        <select id="cloth-category" required class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                            <option value="เสื้อ">เสื้อ</option>
-                            <option value="กางเกง">กางเกง</option>
-                            <option value="กระโปรง">กระโปรง</option>
-                            <option value="เดรส">เดรส</option>
-                            <option value="รองเท้า">รองเท้า</option>
-                            <option value="กระเป๋า">กระเป๋า</option>
-                            <option value="เครื่องประดับ">เครื่องประดับ</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">โทนสี</label>
-                        <input type="text" id="cloth-color" required placeholder="เช่น ขาว, ดำ" class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">สไตล์</label>
-                    <select id="cloth-style" required class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                        <option value="CASUAL">CASUAL</option>
-                        <option value="KOREAN">KOREAN</option>
-                        <option value="VINTAGE">VINTAGE</option>
-                        <option value="STREET">STREET</option>
-                        <option value="FORMAL">FORMAL</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-[#E89387] hover:bg-[#d88276] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm mt-2">
-                    บันทึกเข้าตู้เสื้อผ้า
+    <!-- MODAL 4: ยืนยันการลบเสื้อผ้า (Custom Confirm Delete Modal) -->
+    <div id="delete-confirm-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#FCE8E8] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-[#D8C2B0] text-center space-y-4 animate-scaleIn">
+            <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner border border-red-200">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-[#3D2B1F]">ยืนยันการลบเสื้อผ้า?</h3>
+                <p class="text-xs text-[#6B5647] mt-1.5 px-4" id="delete-modal-cloth-name">
+                    คุณแน่ใจหรือไม่ว่าต้องการลบเสื้อผ้าชิ้นนี้ออกจากตู้เสื้อผ้าของคุณ
+                </p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeDeleteConfirmModal()" class="flex-1 bg-[#EBD9CB] hover:bg-[#D8C2B0] text-[#3D2B1F] font-bold py-2.5 rounded-xl text-xs transition">
+                    ยกเลิก
                 </button>
-            </form>
+                <button id="btn-confirm-delete-action" onclick="executeDeleteClothItem()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">
+                    ลบเลย
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL: LOGIN -->
-    <div id="login-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl border border-[#EAE6DF] relative space-y-4">
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-gray-800 text-center">เข้าสู่ระบบ Longlook</h3>
-            <form onsubmit="handleLogin(event)" class="space-y-3">
-                <input type="text" id="login-username" required placeholder="ชื่อผู้ใช้งาน" class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                <input type="password" placeholder="รหัสผ่าน" class="w-full p-2.5 rounded-xl border border-gray-200 text-xs bg-[#FAF7F2]">
-                <button type="submit" class="w-full bg-[#8C6D53] text-white py-2.5 rounded-xl text-xs font-semibold">เข้าสู่ระบบ</button>
-            </form>
-        </div>
+    <!-- TOAST NOTIFICATION (UI แจ้งเตือนสวยงามเข้ากับธีม LongLook) -->
+    <div id="longlook-toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#3D2B1F] text-[#FFF0F5] border border-[#D8C2B0] px-5 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none max-w-sm">
+        <span id="longlook-toast-icon" class="text-xl shrink-0"><i class="fa-solid fa-circle-check text-[#7A9A8B]"></i></span>
+        <div class="text-xs font-medium" id="longlook-toast-message">แจ้งเตือนสำเร็จ</div>
     </div>
 
-    <!-- CUSTOM POPUP NOTIFICATION -->
-    <div id="custom-popup" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white max-w-xs w-full p-6 rounded-2xl shadow-xl text-center space-y-4">
-            <p id="popup-message" class="text-sm font-semibold text-gray-700"></p>
-            <button onclick="closePopup()" class="w-full bg-[#8C6D53] text-white py-2 rounded-xl text-xs font-semibold">ตกลง</button>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <script src="js/config.js?v=1.4"></script>
+    <script src="js/navigation.js?v=1.4"></script>
+    <script src="js/auth.js?v=1.4"></script>
+    <script src="js/closet.js?v=1.4"></script>
+    <script src="js/calendar.js?v=1.4"></script>
     <script>
-        // Modal Handlers
-        function openLoginModal() {
-            const modal = document.getElementById('login-modal');
-            if (modal) modal.classList.remove('hidden');
-        }
-        function closeLoginModal() {
-            const modal = document.getElementById('login-modal');
-            if (modal) modal.classList.add('hidden');
-        }
-        function openAddClothModal() {
-            const modal = document.getElementById('add-cloth-modal');
-            if (modal) modal.classList.remove('hidden');
-        }
-        function closeAddClothModal() {
-            const modal = document.getElementById('add-cloth-modal');
-            if (modal) modal.classList.add('hidden');
-        }
-
-        // Handle Add Cloth from Modal
-        async function handleAddCloth(e) {
-            e.preventDefault();
-            const name = document.getElementById('cloth-name').value.trim();
-            const category = document.getElementById('cloth-category').value;
-            const color = document.getElementById('cloth-color') ? document.getElementById('cloth-color').value.trim() : '';
-            const style = document.getElementById('cloth-style') ? document.getElementById('cloth-style').value : '';
-            const fileInput = document.getElementById('cloth-image');
-
-            if (!name) return alert('กรุณากรอกชื่อเสื้อผ้า');
-
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('category', category);
-            formData.append('color', color);
-            formData.append('style', style);
-
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                formData.append('image', fileInput.files[0]);
-            } else {
-                formData.append('imageUrl', 'https://images.unsplash.com/photo-1589465257551-f4639982fbc4?w=300');
-            }
-
-            if (typeof saveItemToClosetApi === 'function') {
-                await saveItemToClosetApi(formData);
-            }
-        }
-
-        // Update Stats from real data
-        function updateStats() {
-            // จำนวนเสื้อผ้าในตู้
-            const totalEl = document.getElementById('stat-total-clothes');
-            if (totalEl) totalEl.innerText = closetItems.length;
-
-            // จำนวน OUTFIT ที่สร้าง (นับ entry ใน calendarOutfits)
-            const totalOutfits = Object.keys(calendarOutfits).length;
-            const outfitsEl = document.getElementById('stat-total-outfits');
-            if (outfitsEl) outfitsEl.innerText = totalOutfits;
-
-            // สไตล์ที่แต่งบ่อยที่สุด
-            const styleEl = document.getElementById('stat-top-style');
-            if (styleEl) {
-                if (closetItems.length === 0 && totalOutfits === 0) {
-                    styleEl.innerText = '-';
-                } else {
-                    const styleCounts = {};
-                    closetItems.forEach(item => {
-                        if (item.style) {
-                            styleCounts[item.style] = (styleCounts[item.style] || 0) + 1;
-                        }
-                    });
-                    const topStyle = Object.keys(styleCounts).sort((a, b) => styleCounts[b] - styleCounts[a])[0];
-                    styleEl.innerText = topStyle || '-';
-                }
-            }
-        }
-
-        // Outfit Builder Dynamic Population
-        function populateBuilderOptions() {
-            const topSelect = document.getElementById('builder-top');
-            const bottomSelect = document.getElementById('builder-bottom');
-            const shoesSelect = document.getElementById('builder-shoes');
-            if (!topSelect || !bottomSelect || !shoesSelect) return;
-
-            topSelect.innerHTML = '<option value="">-- เลือกเสื้อ --</option>';
-            bottomSelect.innerHTML = '<option value="">-- เลือกกางเกง/กระโปรง --</option>';
-            shoesSelect.innerHTML = '<option value="">-- เลือกรองเท้า --</option>';
-
-            closetItems.forEach(item => {
-                const opt = `<option value="${item.id}">${item.name}</option>`;
-                if (item.category === 'เสื้อ' || item.category === 'เดรส') topSelect.innerHTML += opt;
-                else if (item.category === 'กางเกง' || item.category === 'กระโปรง') bottomSelect.innerHTML += opt;
-                else if (item.category === 'รองเท้า') shoesSelect.innerHTML += opt;
-            });
-        }
-
-        function previewBuilder() {
-            const topId = document.getElementById('builder-top')?.value;
-            const bottomId = document.getElementById('builder-bottom')?.value;
-            const shoesId = document.getElementById('builder-shoes')?.value;
-            const previewBox = document.getElementById('builder-preview-box');
-            if (!previewBox) return;
-
-            const selected = [topId, bottomId, shoesId]
-                .filter(Boolean)
-                .map(id => closetItems.find(it => it.id == id))
-                .filter(Boolean);
-
-            if (selected.length === 0) {
-                previewBox.innerHTML = '<p class="text-xs text-gray-400">กรุณาเลือกไอเทมเพื่อดูตัวอย่างชุด</p>';
-                return;
-            }
-
-            previewBox.innerHTML = selected.map(it => `
-                <div class="text-center p-2 bg-white rounded-xl shadow-sm border border-gray-100 w-24">
-                    <img src="${it.image}" class="h-20 w-full object-contain mb-1">
-                    <p class="text-[11px] font-bold text-gray-700 truncate">${it.name}</p>
-                </div>
-            `).join('');
-        }
-
-        async function saveManualOutfit() {
-            const token = localStorage.getItem('wardrobe_token');
-            if (!token) {
-                showPopup('🔒 กรุณาเข้าสู่ระบบก่อนสร้างชุด OUTFIT เพื่อบันทึกลงใน Oracle Database', () => {
-                    if (typeof switchPage === 'function') switchPage('login');
-                });
-                return;
-            }
-
-            const topId = document.getElementById('builder-top')?.value;
-            const bottomId = document.getElementById('builder-bottom')?.value;
-            const shoesId = document.getElementById('builder-shoes')?.value;
-
-            if (!topId && !bottomId && !shoesId) {
-                showPopup('⚠️\nต้องเลือกเสื้อผ้าอย่างน้อย 1 ชิ้นเพื่อสร้างชุด');
-                return;
-            }
-
-            const itemIds = [topId, bottomId, shoesId].filter(Boolean).map(id => parseInt(id, 10));
-
-            try {
-                const response = await fetch(`${getApiBaseUrl()}/api/outfits`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getAuthHeaders()
-                    },
-                    body: JSON.stringify({
-                        outfit_name: 'ลุคสร้างเอง (Outfit Builder)',
-                        description: 'ชุดแต่งกายที่ประกอบจากหน้า OUTFIT BUILDER',
-                        items: itemIds,
-                        log_to_calendar: true
-                    })
-                });
-
-                const data = await response.json();
-                if (response.ok) {
-                    const today = new Date().toISOString().split('T')[0];
-                    const selectedItems = closetItems.filter(it => itemIds.includes(parseInt(it.id, 10)));
-                    calendarOutfits[today] = selectedItems;
-                    window.calendarOutfits = calendarOutfits;
-                    localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
-
-                    if (typeof initRealCalendar === 'function') initRealCalendar();
-                    showPopup('🎉\nบันทึก OUTFIT ลงใน Oracle Database สำเร็จแล้ว!', () => {
-                        switchPage('calendar');
-                    });
-                } else {
-                    alert(data.message || 'ไม่สามารถบันทึก OUTFIT ลงฐานข้อมูลได้');
-                }
-            } catch (err) {
-                console.error('Save manual outfit error:', err);
-                alert('⚠️ ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึก OUTFIT ได้: ' + err.message);
-            }
-        }
-
-        // Initialize Everything
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof initRealCalendar === 'function') initRealCalendar();
-            if (typeof renderCloset === 'function') renderCloset();
-            populateBuilderOptions();
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
+      }
     </script>
-    <script src="js/app.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/calendar.js"></script>
-    <script src="js/closet.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/outfit.js"></script>
-    <script src="js/popup.js"></script>
-    <script src="js/user.js"></script>
-    <script src="js/weather.js"></script>
 </body>
 </html>

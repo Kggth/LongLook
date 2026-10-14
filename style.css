@@ -1,61 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Prompt:wght@300;400;500;600;700&display=swap');
+
+/* ตั้งค่าฟอนต์โลโก้แบบเขียน Cursive */
+.logo-font {
+  font-family: 'Great Vibes', cursive;
+}
+
+/* พื้นหลังสีชมพูอ่อนนุ่ม เรียบๆ ไม่มีลายจุด */
 body {
-    font-family: 'Prompt', sans-serif;
-    background-color: #F7F5F0;
+  font-family: 'Prompt', sans-serif;
+  background-color: #FCE8E8 !important; /* ชมพูอ่อนเรียบเนียน */
+  background-image: none !important; /* ลบลายจุดออก */
+  color: #4A3E3D;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-    display: none;
+/* เมนูด้านข้าง (Sidebar) สีน้ำตาลเข้มคลาสสิก */
+.sidebar-bg {
+  background-color: #3D2B1F !important;
+  color: #FFF0F5;
 }
 
-.hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+/* การ์ดและกล่องคอนเทนต์ สีน้ำตาลอ่อนละมุน */
+.card-bg {
+  background-color: #EBD9CB !important; /* น้ำตาลอ่อน */
+  border: 1px solid #D8C2B0;
 }
 
-/* Popup Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+/* ปุ่มกดเน้นสีน้ำตาลช็อกโกแลต */
+.btn-primary {
+  background-color: #4A3E3D !important;
+  color: #FFFFFF !important;
+  transition: all 0.2s ease-in-out;
 }
 
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-#custom-popup:not(.hidden) {
-    animation: fadeIn 0.2s ease-out;
-}
-
-#custom-popup:not(.hidden) > div {
-    animation: slideUp 0.3s ease-out;
-}
-
-/* Page Transition */
-.page-content {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* Smooth transitions for all interactive elements */
-button, a, .hover\:shadow-md {
-    transition: all 0.2s ease-in-out;
+.btn-primary:hover {
+  background-color: #3D2B1F !important;
+  transform: translateY(-1px);
 }
