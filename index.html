@@ -370,46 +370,75 @@
     <!-- MODAL 1: ถ่ายรูป/เพิ่มเสื้อผ้า -->
     <div id="camera-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-[#FCE8E8] w-full max-w-md rounded-3xl p-6 shadow-xl border border-[#D8C2B0] relative space-y-4 animate-modal-in">
-            <button onclick="closeCameraModal()" class="absolute top-4 right-4 text-gray-500 font-bold"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-base font-bold text-[#3D2B1F]">📷 เพิ่มเสื้อผ้า (กล้อง / อัปโหลด)</h3>
+            <div class="flex justify-between items-center border-b border-[#D8C2B0] pb-2">
+                <h3 class="text-base font-bold text-[#3D2B1F] flex items-center gap-2">
+                    <i class="fa-solid fa-shirt text-[#89C2D9]"></i> เพิ่มเสื้อผ้าใหม่เข้าตู้
+                </h3>
+                <button onclick="closeCameraModal()" class="text-gray-500 hover:text-black font-bold p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
 
-            <div class="bg-[#3D2B1F] rounded-2xl h-48 flex items-center justify-center overflow-hidden relative">
+            <!-- กล่องแสดงตัวอย่างรูป / กล้องเว็บแคม -->
+            <div class="relative bg-white rounded-2xl h-44 flex flex-col items-center justify-center overflow-hidden border border-[#D8C2B0] shadow-inner group">
                 <video id="webcam-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                <span id="camera-placeholder" class="text-white text-xs text-center px-4">กด "เปิดกล้อง" เพื่อขออนุญาตใช้งานกล้อง</span>
+                <img id="image-upload-preview" class="w-full h-full object-contain hidden p-2" alt="ตัวอย่างเสื้อผ้า">
+                
+                <div id="camera-placeholder" class="flex flex-col items-center justify-center text-center p-4">
+                    <div class="w-12 h-12 rounded-full bg-[#FAF1EC] text-[#8C6D53] flex items-center justify-center text-xl mb-2 border border-[#D8C2B0]">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-[#3D2B1F]">อัปโหลดรูปภาพ หรือ เปิดกล้องถ่ายภาพ</span>
+                    <span class="text-[10px] text-[#6B5647] mt-0.5">ระบบ Gemini AI จะช่วยวิเคราะห์และระบุหมวดหมู่อัตโนมัติ</span>
+                </div>
             </div>
 
-            <div class="flex gap-2">
-                <button onclick="startCameraPermission()" class="flex-1 bg-[#EBD9CB] text-[#3D2B1F] font-bold py-2 rounded-xl text-xs">เปิดกล้อง</button>
-                <button onclick="takeCameraPhoto()" class="flex-1 bg-[#3D2B1F] text-white py-2 rounded-xl text-xs font-medium">ถ่ายรูป</button>
+            <!-- แถบปุ่มเลือกวิธีเพิ่มภาพ (ถ่ายรูป หรือ อัปโหลดไฟล์) -->
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="startCameraPermission()" class="bg-[#EBD9CB] hover:bg-[#D8C2B0] text-[#3D2B1F] font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm">
+                    <i class="fa-solid fa-camera"></i> เปิดกล้อง
+                </button>
+                <button type="button" onclick="takeCameraPhoto()" class="bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition shadow-sm">
+                    <i class="fa-solid fa-camera-retro"></i> ถ่ายรูป
+                </button>
             </div>
 
-            <input type="file" id="file-upload-input" accept="image/*" class="text-xs text-gray-500 w-full">
-            <input type="text" id="cloth-name-input" placeholder="ชื่อเสื้อผ้า (เช่น เสื้อยืดโอเวอร์ไซส์, กางเกงยีนส์)" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white">
+            <!-- Styled File Upload Input -->
+            <div>
+                <label class="block text-[10px] font-bold text-[#6B5647] mb-1">หรือเลือกไฟล์รูปภาพจากอุปกรณ์:</label>
+                <input type="file" id="file-upload-input" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border file:border-[#D8C2B0] file:text-xs file:font-semibold file:bg-[#EBD9CB] file:text-[#3D2B1F] hover:file:bg-[#D8C2B0] cursor-pointer">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-[#6B5647] mb-1">ชื่อเสื้อผ้า</label>
+                <input type="text" id="cloth-name-input" placeholder="เช่น เสื้อยืดโอเวอร์ไซส์, กางเกงยีนส์ขากระบอก" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F] focus:outline-none focus:ring-2 focus:ring-[#3D2B1F]/30">
+            </div>
             
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-[10px] font-bold text-[#6B5647] mb-1">หมวดหมู่</label>
-                    <select id="cloth-category-input" class="w-full p-2 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
-                        <option value="เสื้อ">👕 ท่อนบน (เสื้อ / แจ็คเก็ต)</option>
-                        <option value="กางเกง">👖 ท่อนล่าง (กางเกง / กระโปรง)</option>
-                        <option value="เดรส">👗 เดรส / ชุดติดกัน</option>
-                        <option value="อื่นๆ">👟 อื่นๆ / เครื่องประดับ</option>
+                    <select id="cloth-category-input" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F] focus:outline-none">
+                        <option value="เสื้อ">👕 เสื้อ / ท่อนบน</option>
+                        <option value="กางเกง">👖 กางเกง</option>
+                        <option value="กระโปรง">👗 กระโปรง</option>
+                        <option value="เดรส">✨ เดรส / ชุดติดกัน</option>
+                        <option value="อื่นๆ">👟 อื่นๆ / รองเท้า / เครื่องประดับ</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-[#6B5647] mb-1">สไตล์</label>
-                    <select id="cloth-style-input" class="w-full p-2 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F]">
-                        <option value="CASUAL">Casual</option>
-                        <option value="KOREAN">Korean / Minimal</option>
-                        <option value="STREETWEAR">Streetwear</option>
-                        <option value="VINTAGE">Vintage / Y2K</option>
-                        <option value="FORMAL">Formal</option>
-                        <option value="SPORTY">Sporty</option>
+                    <select id="cloth-style-input" class="w-full p-2.5 rounded-xl border border-[#D8C2B0] text-xs bg-white text-[#3D2B1F] focus:outline-none">
+                        <option value="CASUAL">CASUAL</option>
+                        <option value="KOREAN">KOREAN / MINIMAL</option>
+                        <option value="STREETWEAR">STREETWEAR</option>
+                        <option value="VINTAGE">VINTAGE / Y2K</option>
+                        <option value="FORMAL">FORMAL</option>
+                        <option value="SPORTY">SPORTY</option>
                     </select>
                 </div>
             </div>
 
-            <button onclick="saveClothToDatabase()" class="w-full bg-[#3D2B1F] text-white py-2.5 rounded-xl text-xs font-medium shadow-md">บันทึกลง Database</button>
+            <button onclick="saveClothToDatabase()" class="w-full bg-[#3D2B1F] hover:bg-[#523B2B] text-white py-2.5 rounded-xl text-xs font-medium shadow-md transition-all duration-200 transform active:scale-95">
+                💾 บันทึกเสื้อผ้าลงตู้
+            </button>
         </div>
     </div>
 
@@ -533,11 +562,11 @@
         <div class="text-xs font-medium" id="longlook-toast-message">แจ้งเตือนสำเร็จ</div>
     </div>
 
-    <script src="js/config.js?v=2.1"></script>
-    <script src="js/navigation.js?v=2.1"></script>
-    <script src="js/auth.js?v=2.1"></script>
-    <script src="js/closet.js?v=2.1"></script>
-    <script src="js/calendar.js?v=2.1"></script>
+    <script src="js/config.js?v=2.2"></script>
+    <script src="js/navigation.js?v=2.2"></script>
+    <script src="js/auth.js?v=2.2"></script>
+    <script src="js/closet.js?v=2.2"></script>
+    <script src="js/calendar.js?v=2.2"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

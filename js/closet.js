@@ -45,6 +45,14 @@ function closeCameraModal() {
         mediaStream = null;
     }
     window.capturedPhotoData = null;
+    
+    // รีเซ็ตพรีวิวภาพและกล้อง
+    const previewImg = document.getElementById('image-upload-preview');
+    const placeholder = document.getElementById('camera-placeholder');
+    const videoElem = document.getElementById('webcam-video');
+    if (previewImg) { previewImg.src = ''; previewImg.classList.add('hidden'); }
+    if (placeholder) placeholder.classList.remove('hidden');
+    if (videoElem) videoElem.classList.add('hidden');
 }
 
 // ขออนุญาตเปิดใช้งานกล้อง Webcam
@@ -667,7 +675,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
-                analyzeClothWithAI(e.target.files[0]);
+                const file = e.target.files[0];
+                const previewImg = document.getElementById('image-upload-preview');
+                const placeholder = document.getElementById('camera-placeholder');
+                const videoElem = document.getElementById('webcam-video');
+
+                if (previewImg) {
+                    previewImg.src = URL.createObjectURL(file);
+                    previewImg.classList.remove('hidden');
+                    if (placeholder) placeholder.classList.add('hidden');
+                    if (videoElem) videoElem.classList.add('hidden');
+                }
+
+                analyzeClothWithAI(file);
             }
         });
     }

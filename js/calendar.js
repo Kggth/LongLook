@@ -241,23 +241,37 @@ async function initCalendar() {
             });
             if (res.ok) {
                 const logs = await res.json();
-                if (Array.isArray(logs)) {
+                if (Array.isArray(logs) && logs.length > 0) {
+                    const newCalendarOutfits = {};
                     logs.forEach(log => {
                         if (log.log_date) {
-                            if (!calendarOutfits[log.log_date]) {
-                                calendarOutfits[log.log_date] = [];
+                            if (!newCalendarOutfits[log.log_date]) {
+                                newCalendarOutfits[log.log_date] = [];
                             }
-                            const existing = calendarOutfits[log.log_date];
-                            if (!existing.some(it => it.image === log.image)) {
-                                existing.push({
-                                    id: log.id,
-                                    name: log.title || 'ลุคบันทึกไว้',
-                                    image: log.image || '',
-                                    style: log.style || 'CASUAL'
+                            if (Array.isArray(log.items) && log.items.length > 0) {
+                                log.items.forEach(it => {
+                                    if (!newCalendarOutfits[log.log_date].some(existing => existing.name === it.name || (it.image && existing.image === it.image))) {
+                                        newCalendarOutfits[log.log_date].push({
+                                            id: it.id,
+                                            name: it.name,
+                                            image: it.image || log.image || '',
+                                            style: log.style || 'CASUAL'
+                                        });
+                                    }
                                 });
+                            } else if (log.image) {
+                                if (!newCalendarOutfits[log.log_date].some(existing => existing.image === log.image)) {
+                                    newCalendarOutfits[log.log_date].push({
+                                        id: log.id,
+                                        name: log.title || 'ลุคบันทึกไว้',
+                                        image: log.image,
+                                        style: log.style || 'CASUAL'
+                                    });
+                                }
                             }
                         }
                     });
+                    calendarOutfits = newCalendarOutfits;
                     localStorage.setItem('wardrobe_calendar', JSON.stringify(calendarOutfits));
                     renderFullCalendar();
                 }

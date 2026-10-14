@@ -194,7 +194,17 @@ app.get('/api/calendar', authenticateToken, (req, res) => {
     try {
         const rows = db.prepare('SELECT * FROM calendar_logs WHERE user_id = ? ORDER BY log_date DESC, id DESC')
             .all(req.user.id);
-        res.json(rows);
+        
+        // แนบรายการ outfit_items เข้าไปในแต่ละ log เพื่อให้หน้าปฏิทินแสดงผลไอเทมได้อย่างถูกต้อง
+        const rowsWithItems = rows.map(r => {
+            const items = r.outfit_id ? db.prepare('SELECT id, cloth_name AS name, cloth_image AS image FROM outfit_items WHERE outfit_id = ?').all(r.outfit_id) : [];
+            return {
+                ...r,
+                items: items
+            };
+        });
+
+        res.json(rowsWithItems);
     } catch (e) {
         console.error(e);
         res.status(500).json({ message: 'ดึงข้อมูลปฏิทินไม่สำเร็จ' });
